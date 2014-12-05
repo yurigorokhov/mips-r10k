@@ -1,6 +1,8 @@
 #ifndef INSTR_HEADER
 #define INSTR_HEADER
 
+#include "error.h"
+
 //--- Types ---
 typedef enum {
   LOAD,
@@ -8,14 +10,21 @@ typedef enum {
   INTEGER,
   BRANCH,
   FPADD,
-  FPMUL  
+  FPMUL,
+  UNKNOWN
 } instr_operation;
+
+typedef unsigned int reg;
 
 typedef struct {
   instr_operation op;
+  reg rs;
+  reg rt;
+  reg rd;
 } instr;
 
+
 //--- Functions ---
-instr parse_instruction(const char* str);
+result parse_instruction(char* str, instr** outInstr);
 
 #endif

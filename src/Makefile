@@ -90,7 +90,8 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_mipsr10k_OBJECTS = mipsr10k.$(OBJEXT) instr.$(OBJEXT)
+am_mipsr10k_OBJECTS = mipsr10k.$(OBJEXT) instr.$(OBJEXT) \
+	error.$(OBJEXT) frontend.$(OBJEXT)
 mipsr10k_OBJECTS = $(am_mipsr10k_OBJECTS)
 mipsr10k_DEPENDENCIES =
 AM_V_P = $(am__v_P_$(V))
@@ -233,7 +234,7 @@ top_build_prefix = ../
 top_builddir = ..
 top_srcdir = ..
 AM_CXXFLAGS = $(INTI_CFLAGS)
-mipsr10k_SOURCES = mipsr10k.c instr.c instr.h
+mipsr10k_SOURCES = mipsr10k.c instr.c instr.h error.c error.h frontend.c frontend.h
 mipsr10k_LDADD = $(INTI_LIBS)
 all: all-am
 
@@ -322,6 +323,8 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+include ./$(DEPDIR)/error.Po
+include ./$(DEPDIR)/frontend.Po
 include ./$(DEPDIR)/instr.Po
 include ./$(DEPDIR)/mipsr10k.Po
 
