@@ -1,17 +1,26 @@
 
-backend.h,65
+backend.h,66
 #define BACKEND_H2,18
-#define BACKEND_DISPATCH_PER_CYCLE 8,114
+#define BACKEND_DISPATCH_PER_CYCLE 11,185
 
-error.h,232
+error.h,299
 #define ERROR_H2,16
 #define SUCCESS 7,74
 #define UNKNOWN_ERROR 8,92
 #define INSTR_PARSING_ERROR 9,116
 #define IDX_OVERFLOW 10,147
 #define BACKEND_FINISHED 11,171
-#define INSTR_QUEUE_FULL 12,200
-typedef int error_code;14,230
+#define INSTR_QUEUE_FULL 12,199
+#define REGISTER_MAP_FULL 13,227
+#define ACTIVE_LIST_FULL 14,256
+typedef int error_code;16,285
+
+active_list.h,136
+#define ACTIVE_LIST_H2,22
+#define ACTIVE_LIST_SIZE 7,84
+  instr* instruction;10,130
+  void* next;11,152
+} active_list_entry;12,166
 
 instr_queue.h,118
 #define INSTR_QUEUE_H2,22
@@ -19,15 +28,25 @@ instr_queue.h,118
 #define ADDR_QUEUE_SIZE 9,130
 #define FP_QUEUE_SIZE 10,157
 
-instr_queue.c,312
+active_list.c,178
+static unsigned int size 3,26
+static active_list_entry* head 4,56
+active_list_entry* get_newest_entry(6,96
+char active_list_is_full(17,297
+error_code active_list_add(24,392
+
+instr_queue.c,416
 static instr* INTEGER_QUEUE[INTEGER_QUEUE4,43
-static instr* ADDRESS_QUEUE[ADDRESS_QUEUE7,106
-static instr* FP_QUEUE[FP_QUEUE10,177
-int get_queue_free_spot(13,237
-int get_int_queue_free_spot(23,399
-int get_addr_queue_free_spot(27,495
-int get_fp_queue_free_spot(31,593
-error_code instr_queue_add(35,682
+static instr* ADDRESS_QUEUE[ADDRESS_QUEUE7,117
+static instr* FP_QUEUE[FP_QUEUE10,199
+int get_queue_free_spot(13,270
+int get_int_queue_free_spot(23,432
+int get_addr_queue_free_spot(27,528
+int get_fp_queue_free_spot(31,626
+instr** get_queue_by_type(35,715
+error_code instr_queue_add(55,1081
+void instr_queue_remove(101,1978
+char instr_queue_is_full(113,2227
 
 frontend.c,225
 static instr** instruction_buffer;3,23
@@ -43,46 +62,57 @@ int main(9,141
 
 instr.c,171
 error_code parse_instruction(9,213
-void skip_whitespace(66,1314
-error_code sm_parse_op(70,1388
-error_code sm_parse_next_hex(77,1566
-instr_operation parse_op(102,2057
+void skip_whitespace(67,1338
+error_code sm_parse_op(71,1412
+error_code sm_parse_next_hex(78,1590
+instr_operation parse_op(103,2081
 
 frontend.h,24
 #define FRONTEND_H2,19
 
-instr.h,354
+instr.h,491
 #define INSTR_HEADER2,21
-  LOAD,13,192
-  STORE,14,200
-  INTEGER,15,209
-  BRANCH,16,220
-  FPADD,17,230
-  FPMUL,18,239
-  UNKNOWN 19,248
-} instr_operation;20,283
-typedef unsigned int reg;22,303
-  instr_operation op;25,347
-  reg rs;26,369
-  reg rt;27,379
-  reg rd;28,389
-  unsigned int extra;29,399
-  unsigned int addr;32,494
-} instr;33,515
+  NONE,15,223
+  FETCH,16,231
+  EXECUTE,17,240
+  FINISHED,18,251
+  COMMITTED19,263
+} instr_stage;20,275
+  LOAD,23,306
+  STORE,24,314
+  INTEGER,25,323
+  BRANCH,26,334
+  FPADD,27,344
+  FPMUL,28,353
+  UNKNOWN 29,362
+} instr_operation;30,427
+typedef unsigned int reg;32,447
+  instr_operation op;35,491
+  reg rs;36,513
+  reg rt;37,535
+  reg rd;38,557
+  unsigned int extra;39,582
+  unsigned int addr;42,677
+  instr_stage stage;43,698
+} instr;44,719
 
-reg_map.c,42
-static unsigned int REG_MAP[REG_MAP3,22
+reg_map.c,244
+static unsigned int PHYS_REGS_VALS[PHYS_REGS_VALS3,22
+static unsigned int REG_MAP[REG_MAP6,116
+int get_free_phys_register(9,192
+error_code map_registers_for_instruction(21,370
+int get_phys_reg_mapping(36,809
+char reg_map_is_full(46,970
 
-backend.c,141
+backend.c,105
 static unsigned int backend_cycle 3,22
 static unsigned int pc_addr 4,61
-static char instructions_left 5,94
-error_code backend_step(8,162
+error_code backend_step(7,127
 
 error.c,28
 const char* get_error(3,20
 
-reg_map.h,70
+reg_map.h,71
 #define REGMAP_H2,17
-#define PHYS_REGS 4,35
-#define LOGI_REGS 5,56
+#define PHYS_REGS 8,94
+#define LOGI_REGS 9,115

@@ -92,7 +92,7 @@ am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am_mipsr10k_OBJECTS = mipsr10k.$(OBJEXT) instr.$(OBJEXT) \
 	error.$(OBJEXT) frontend.$(OBJEXT) backend.$(OBJEXT) \
-	reg_map.$(OBJEXT) instr_queue.$(OBJEXT)
+	reg_map.$(OBJEXT) instr_queue.$(OBJEXT) active_list.$(OBJEXT)
 mipsr10k_OBJECTS = $(am_mipsr10k_OBJECTS)
 mipsr10k_DEPENDENCIES =
 AM_V_P = $(am__v_P_$(V))
@@ -235,7 +235,7 @@ top_build_prefix = ../
 top_builddir = ..
 top_srcdir = ..
 AM_CXXFLAGS = $(INTI_CFLAGS)
-mipsr10k_SOURCES = mipsr10k.c instr.c instr.h error.c error.h frontend.c frontend.h backend.c backend.h reg_map.c reg_map.h instr_queue.c instr_queue.h
+mipsr10k_SOURCES = mipsr10k.c instr.c instr.h error.c error.h frontend.c frontend.h backend.c backend.h reg_map.c reg_map.h instr_queue.c instr_queue.h active_list.c active_list.h
 mipsr10k_LDADD = $(INTI_LIBS)
 all: all-am
 
@@ -324,6 +324,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+include ./$(DEPDIR)/active_list.Po
 include ./$(DEPDIR)/backend.Po
 include ./$(DEPDIR)/error.Po
 include ./$(DEPDIR)/frontend.Po

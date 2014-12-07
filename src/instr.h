@@ -10,26 +10,37 @@
 
 //--- Types ---
 typedef enum {
+
+  // TODO: more may be needed
+  NONE,
+  FETCH,
+  EXECUTE,
+  FINISHED,
+  COMMITTED
+} instr_stage;
+
+typedef enum {
   LOAD,
   STORE,
   INTEGER,
   BRANCH,
   FPADD,
   FPMUL,
-  UNKNOWN // TODO: get rid of this
+  UNKNOWN // only possible at parsing time (will generate error)
 } instr_operation;
 
 typedef unsigned int reg;
 
 typedef struct {
   instr_operation op;
-  reg rs;
-  reg rt;
-  reg rd;
+  reg rs; // source 1
+  reg rt; // source 2
+  reg rd; // destination
   unsigned int extra;
   
   // the address (line number) from which this instruction was loaded
   unsigned int addr;
+  instr_stage stage;
 } instr;
 
 
