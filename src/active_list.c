@@ -21,6 +21,10 @@ char active_list_is_full() {
   return 0;
 }
 
+char active_list_is_empty() {
+  return (size == 0) ? 1 : 0;
+}
+
 error_code active_list_add(instr* instruction) {
   if(active_list_is_full()) {
     return ACTIVE_LIST_FULL;

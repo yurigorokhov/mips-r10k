@@ -28,12 +28,13 @@ instr_queue.h,118
 #define ADDR_QUEUE_SIZE 9,130
 #define FP_QUEUE_SIZE 10,157
 
-active_list.c,178
+active_list.c,212
 static unsigned int size 3,26
 static active_list_entry* head 4,56
 active_list_entry* get_newest_entry(6,96
 char active_list_is_full(17,297
-error_code active_list_add(24,392
+char active_list_is_empty(24,392
+error_code active_list_add(28,455
 
 instr_queue.c,416
 static instr* INTEGER_QUEUE[INTEGER_QUEUE4,43

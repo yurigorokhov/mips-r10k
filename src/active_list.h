@@ -13,6 +13,7 @@ typedef struct {
 
 //--- Functions ---
 char active_list_is_full();
+char active_list_is_empty();
 error_code active_list_add(instr* instruction);
 
 #endif

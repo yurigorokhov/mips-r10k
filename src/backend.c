@@ -43,5 +43,10 @@ error_code backend_step() {
   }
 
   // functional step
+  
+  // if the active list is empty, we are done :)
+  if(active_list_is_empty()) {
+    return BACKEND_FINISHED;
+  }
   return SUCCESS;
 }
