@@ -1,0 +1,12 @@
+
+config.h.in,215
+#undef PACKAGE4,87
+#undef PACKAGE_BUGREPORT7,182
+#undef PACKAGE_NAME10,255
+#undef PACKAGE_STRING13,335
+#undef PACKAGE_TARNAME16,417
+#undef PACKAGE_URL19,489
+#undef PACKAGE_VERSION22,554
+#undef VERSION25,610
+
+/mnt/hgfs/yurig/Workspace/mips-r10k/src/TAGS,include

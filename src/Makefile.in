@@ -91,7 +91,8 @@ CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am_mipsr10k_OBJECTS = mipsr10k.$(OBJEXT) instr.$(OBJEXT) \
-	error.$(OBJEXT) frontend.$(OBJEXT)
+	error.$(OBJEXT) frontend.$(OBJEXT) backend.$(OBJEXT) \
+	reg_map.$(OBJEXT) instr_queue.$(OBJEXT)
 mipsr10k_OBJECTS = $(am_mipsr10k_OBJECTS)
 mipsr10k_DEPENDENCIES =
 AM_V_P = $(am__v_P_@AM_V@)
@@ -234,7 +235,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AM_CXXFLAGS = $(INTI_CFLAGS)
-mipsr10k_SOURCES = mipsr10k.c instr.c instr.h error.c error.h frontend.c frontend.h
+mipsr10k_SOURCES = mipsr10k.c instr.c instr.h error.c error.h frontend.c frontend.h backend.c backend.h reg_map.c reg_map.h instr_queue.c instr_queue.h
 mipsr10k_LDADD = $(INTI_LIBS)
 all: all-am
 
@@ -323,10 +324,13 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/backend.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/error.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/frontend.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/instr.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/instr_queue.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mipsr10k.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/reg_map.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

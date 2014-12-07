@@ -1,6 +1,11 @@
 #ifndef INSTR_HEADER
 #define INSTR_HEADER
 
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <limits.h>
+#include "error.h"
 #include "error.h"
 
 //--- Types ---
@@ -11,7 +16,7 @@ typedef enum {
   BRANCH,
   FPADD,
   FPMUL,
-  UNKNOWN
+  UNKNOWN // TODO: get rid of this
 } instr_operation;
 
 typedef unsigned int reg;
@@ -21,10 +26,14 @@ typedef struct {
   reg rs;
   reg rt;
   reg rd;
+  unsigned int extra;
+  
+  // the address (line number) from which this instruction was loaded
+  unsigned int addr;
 } instr;
 
 
 //--- Functions ---
-result parse_instruction(char* str, instr** outInstr);
+error_code parse_instruction(char* str, instr** outInstr, unsigned int);
 
 #endif

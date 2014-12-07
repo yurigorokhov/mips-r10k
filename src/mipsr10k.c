@@ -4,6 +4,7 @@
 #include "instr.h"
 #include "error.h"
 #include "frontend.h"
+#include "backend.h"
 
 int main(int argc, char **argv) {
   if(argc != 2) {
@@ -15,6 +16,7 @@ int main(int argc, char **argv) {
     printf("\nCannot read file: %s\n", filename);
     return 1;
   }
+  error_code code;
 
   // read file and parse instructions into frontend
   frontend_init(100);
@@ -25,9 +27,9 @@ int main(int argc, char **argv) {
     
     // parse instruction
     instr* parsed_instr;
-    result parse_res = parse_instruction(line_buffer, &parsed_instr);
-    if(parse_res.status == ERROR) {
-      printf("%s: %i (%s)", parse_res.errorMsg, i, line_buffer);
+    code = parse_instruction(line_buffer, &parsed_instr, i);
+    if(SUCCESS != code) {
+      printf("%s: %i (%s)", get_error(code), i, line_buffer);
       exit(1);
     }
 
@@ -37,6 +39,9 @@ int main(int argc, char **argv) {
   }
   printf("\nLoaded %i instructions\n", i);
   fclose(input_file);
+  while(SUCCESS == (code = backend_step())) {
+    // cycle has happened
+  }
   frontend_clean();
   return 0;
 }

@@ -1,12 +1,10 @@
-#include <stdlib.h>
 #include "error.h"
 
-result get_success() {
-  result res = { SUCCESS, "" };
-  return res;
-};
-
-result get_error(const char* errorMsg) {
-  result res = { ERROR, errorMsg };
-  return res;
+const char* get_error(error_code code) {
+  assert(code != SUCCESS);
+  switch(code) {
+  case INSTR_PARSING_ERROR: return "there was an error parsing the instruction";
+  case UNKNOWN_ERROR:
+  default: return "an unknown error occured";
+  }
 };

@@ -2,10 +2,11 @@
 #define FRONTEND_H
 
 #include "instr.h"
-#include "error.h"
+#include <stdlib.h>
 
 void frontend_init(unsigned int);
-result frontend_enqueue(instr*);
+void frontend_enqueue(instr*);
 void frontend_clean();
+void frontend_getinstr(unsigned int, instr**);
 
 #endif
