@@ -29,7 +29,7 @@ error_code active_list_add(instr* instruction) {
   if(active_list_is_full()) {
     return ACTIVE_LIST_FULL;
   }
-  active_list_entry* entry = malloc(sizeof(active_list_entry*));
+  active_list_entry* entry = malloc(sizeof(active_list_entry));
   entry->instruction = instruction;
   entry->next = NULL;
   active_list_entry* newest = get_newest_entry();

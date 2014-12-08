@@ -10,10 +10,10 @@
 
 //--- Types ---
 typedef enum {
-
-  // TODO: more may be needed
   NONE,
   FETCH,
+  DECODE,
+  ISSUE,
   EXECUTE,
   FINISHED,
   COMMITTED

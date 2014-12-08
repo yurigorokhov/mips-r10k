@@ -12,6 +12,7 @@
 #define INSTR_QUEUE_FULL -4
 #define REGISTER_MAP_FULL -5
 #define ACTIVE_LIST_FULL -6
+#define DECODE_BUFFER_FULL -7
 
 typedef int error_code;
 

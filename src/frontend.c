@@ -23,9 +23,9 @@ void frontend_clean() {
 }
 
 error_code frontend_getinsr(unsigned int addr, instr** res) {
-  if(addr >= idx) {
+  if(addr >= idx || addr < 1) {
     return IDX_OVERFLOW;
   }
-  *res = instruction_buffer[addr];
+  *res = instruction_buffer[addr-1];
   return SUCCESS;
 }

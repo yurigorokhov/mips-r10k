@@ -3,50 +3,29 @@
 static unsigned int backend_cycle = 0;
 static unsigned int pc_addr = 1;
 
-//TODO: return BACKEND_FINISHED
-error_code backend_step() {
+error_code backend_cycle_step() {
   backend_cycle++;
   
-  // fetch next instructions
-  instr* instructions[BACKEND_DISPATCH_PER_CYCLE];
+  // calc all stages
+  __calc_functional_units();
+  __calc_instr_queue();
+  
+  // calc for decode buffer
+  instr* instruction;
   error_code code;
   unsigned int i = 0;
   while(i < BACKEND_DISPATCH_PER_CYCLE && 
-	SUCCESS == (code = frontend_getinsr(pc_addr, &instructions[i]))) {
+	SUCCESS == (code = frontend_getinsr(pc_addr+i, &instruction))) {
+    __calc_decode_buffer_add(instruction);
     i++;
   }
 
-  // dispatch instructions
-  if(i > 0) {
-    unsigned int j;
-    for(j = 0; j <= i; ++j) {
-      if(!active_list_is_full() 
-	 && !instr_queue_is_full(instructions[j]) 
-	 && !reg_map_is_full()) {
+  // edge all stages
+  __edge_functional_units();
+  __edge_instr_queue();
 
-	// enqueue instruction
-	code = instr_queue_add(instructions[j]);
-	if(SUCCESS != code) {
-	  return code;
-	}
-
-	// update register mapping
-	code = map_registers_for_instruction(instructions[j]);
-	if(SUCCESS != code) {
-	  return code;
-	}
-
-	// we dispatched successfully, increment pc counter
-	pc_addr++;  
-      }
-    }
-  }
-
-  // functional step
-  
-  // if the active list is empty, we are done :)
-  if(active_list_is_empty()) {
-    return BACKEND_FINISHED;
-  }
+  // decode edge returns how many instructions it was able to accept
+  unsigned int num_fetched = __edge_decode_buffer_accept_instructions();
+  pc_addr += num_fetched;
   return SUCCESS;
 }

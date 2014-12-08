@@ -39,7 +39,7 @@ int main(int argc, char **argv) {
   }
   printf("\nLoaded %i instructions\n", i);
   fclose(input_file);
-  while(SUCCESS == (code = backend_step())) {
+  while(SUCCESS == (code = backend_cycle_step())) {
     // cycle has happened
   }
   frontend_clean();

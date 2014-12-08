@@ -1,9 +1,9 @@
 
 backend.h,66
 #define BACKEND_H2,18
-#define BACKEND_DISPATCH_PER_CYCLE 11,185
+#define BACKEND_DISPATCH_PER_CYCLE 13,236
 
-error.h,299
+error.h,334
 #define ERROR_H2,16
 #define SUCCESS 7,74
 #define UNKNOWN_ERROR 8,92
@@ -13,7 +13,8 @@ error.h,299
 #define INSTR_QUEUE_FULL 12,199
 #define REGISTER_MAP_FULL 13,227
 #define ACTIVE_LIST_FULL 14,256
-typedef int error_code;16,285
+#define DECODE_BUFFER_FULL 15,284
+typedef int error_code;17,315
 
 active_list.h,136
 #define ACTIVE_LIST_H2,22
@@ -22,11 +23,14 @@ active_list.h,136
   void* next;11,152
 } active_list_entry;12,166
 
-instr_queue.h,118
+instr_queue.h,197
 #define INSTR_QUEUE_H2,22
-#define INT_QUEUE_SIZE 8,104
-#define ADDR_QUEUE_SIZE 9,130
-#define FP_QUEUE_SIZE 10,157
+#define INT_QUEUE_SIZE 9,125
+#define ADDR_QUEUE_SIZE 10,151
+#define FP_QUEUE_SIZE 11,178
+  instr* instruction;14,221
+  void* next;15,243
+} instr_queue_entry;16,257
 
 active_list.c,212
 static unsigned int size 3,26
@@ -36,18 +40,38 @@ char active_list_is_full(17,297
 char active_list_is_empty(24,392
 error_code active_list_add(28,455
 
-instr_queue.c,416
-static instr* INTEGER_QUEUE[INTEGER_QUEUE4,43
-static instr* ADDRESS_QUEUE[ADDRESS_QUEUE7,117
-static instr* FP_QUEUE[FP_QUEUE10,199
-int get_queue_free_spot(13,270
-int get_int_queue_free_spot(23,432
-int get_addr_queue_free_spot(27,528
-int get_fp_queue_free_spot(31,626
-instr** get_queue_by_type(35,715
-error_code instr_queue_add(55,1081
-void instr_queue_remove(101,1978
-char instr_queue_is_full(113,2227
+instr_queue.c,500
+static instr_queue_entry* int_queue_head 4,43
+static instr_queue_entry* addr_queue_head 7,110
+static instr_queue_entry* fp_queue_head 10,185
+static instr* _queue_lookahead[_queue_lookahead12,234
+static size_t _queue_lookahead_size 13,305
+size_t get_queue_size(16,367
+instr_queue_entry** get_queue_by_type(26,534
+void instr_queue_remove(46,923
+instr* instr_queue_get_ready_int_instr(66,1427
+void __calc_instr_queue(81,1799
+void insert_instruction(92,2130
+void __edge_instr_queue(105,2516
+
+decode_buffer.h,142
+#define DECODE_BUFFER_H2,24
+#define DECODE_BUFFER_SIZE 7,88
+  instr* instruction;10,135
+  void* next;11,157
+} decode_buffer_entry;12,171
+
+decode_buffer.c,471
+static decode_buffer_entry* decode_buffer_head 3,28
+static unsigned int decode_buffer_size 4,84
+static instr* __calc_scheduled_to_be_added[__calc_scheduled_to_be_added6,129
+static unsigned int __calc_scheduled_size 7,204
+char is_full(9,252
+void add_instruction(19,460
+error_code __calc_decode_buffer_add(33,922
+int __edge_decode_buffer_accept_instructions(41,1163
+instr* decode_buffer_get_next_ready_instr(54,1481
+void decode_buffer_remove_instruction(69,1835
 
 frontend.c,225
 static instr** instruction_buffer;3,23
@@ -68,34 +92,49 @@ error_code sm_parse_op(71,1412
 error_code sm_parse_next_hex(78,1590
 instr_operation parse_op(103,2081
 
+functional.h,80
+#define FUNCTIONAL_H2,21
+  instr* instruction;8,105
+} functional_entry;9,127
+
 frontend.h,24
 #define FRONTEND_H2,19
 
-instr.h,491
+instr.h,524
 #define INSTR_HEADER2,21
-  NONE,15,223
-  FETCH,16,231
-  EXECUTE,17,240
-  FINISHED,18,251
-  COMMITTED19,263
-} instr_stage;20,275
-  LOAD,23,306
-  STORE,24,314
-  INTEGER,25,323
-  BRANCH,26,334
-  FPADD,27,344
-  FPMUL,28,353
-  UNKNOWN 29,362
-} instr_operation;30,427
-typedef unsigned int reg;32,447
-  instr_operation op;35,491
-  reg rs;36,513
-  reg rt;37,535
-  reg rd;38,557
-  unsigned int extra;39,582
-  unsigned int addr;42,677
-  instr_stage stage;43,698
-} instr;44,719
+  NONE,13,192
+  FETCH,14,200
+  DECODE,15,209
+  ISSUE,16,219
+  EXECUTE,17,228
+  FINISHED,18,239
+  COMMITTED19,251
+} instr_stage;20,263
+  LOAD,23,294
+  STORE,24,302
+  INTEGER,25,311
+  BRANCH,26,322
+  FPADD,27,332
+  FPMUL,28,341
+  UNKNOWN 29,350
+} instr_operation;30,415
+typedef unsigned int reg;32,435
+  instr_operation op;35,479
+  reg rs;36,501
+  reg rt;37,523
+  reg rd;38,545
+  unsigned int extra;39,570
+  unsigned int addr;42,665
+  instr_stage stage;43,686
+} instr;44,707
+
+functional.c,246
+static instr* _next_instr_alu1 4,59
+static instr* _next_instr_alu2 5,98
+static functional_entry* _curr_instr_alu1 8,174
+static functional_entry* _curr_instr_alu2 9,224
+void __calc_functional_units(11,275
+void __edge_functional_units(18,490
 
 reg_map.c,244
 static unsigned int PHYS_REGS_VALS[PHYS_REGS_VALS3,22
@@ -105,10 +144,10 @@ error_code map_registers_for_instruction(21,370
 int get_phys_reg_mapping(36,809
 char reg_map_is_full(46,970
 
-backend.c,105
+backend.c,104
 static unsigned int backend_cycle 3,22
 static unsigned int pc_addr 4,61
-error_code backend_step(7,127
+error_code backend_calc(6,95
 
 error.c,28
 const char* get_error(3,20
