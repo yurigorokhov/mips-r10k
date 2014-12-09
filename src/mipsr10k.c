@@ -32,7 +32,7 @@ int main(int argc, char **argv) {
       printf("%s: %i (%s)", get_error(code), i, line_buffer);
       exit(1);
     }
-
+    
     // store the instruction in the frontend
     frontend_enqueue(parsed_instr);
     ++i;

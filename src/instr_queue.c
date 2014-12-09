@@ -92,6 +92,7 @@ void __calc_instr_queue() {
 void insert_instruction(instr* instruction, instr_queue_entry** queue) {
   instr_queue_entry* entry = malloc(sizeof(instr_queue_entry));
   entry->instruction = instruction;
+  entry->cycles_left = DECODE_CYCLES;
   entry->next = NULL;
   if(NULL == *queue) {
     *queue = entry;
@@ -106,6 +107,13 @@ void __edge_instr_queue() {
   if(_queue_lookahead_size > 0) {
     unsigned int i;
     for(i = 0; i < _queue_lookahead_size; ++i) {
+      
+      // if the active instruction list is full, there is nothing we can do
+      if(active_list_is_full()) {
+	break;
+      }
+
+      // check the proper queue to make sure there is room
       size_t queue_size;
       instr_queue_entry** queue = get_queue_by_type(_queue_lookahead[i], &queue_size);
       if(queue_size == get_queue_size(*queue)) {
@@ -117,7 +125,17 @@ void __edge_instr_queue() {
       // insert into queue & delete from decode buffer
       insert_instruction(_queue_lookahead[i], queue);
       decode_buffer_remove_instruction(_queue_lookahead[i]);
+
+      // STAGE >> DECODE
+      _queue_lookahead[i]->stage = DECODE;
+
+      // add to active list
+      active_list_add(_queue_lookahead[i]);
     }
     _queue_lookahead_size = 0;
   }
+}
+
+unsigned int instr_queue_free_int_spots_next_clock() {
+  return min(INT_QUEUE_SIZE - get_queue_size(int_queue_head) + functional_free_int_spots_next_clock(), INT_QUEUE_SIZE);
 }

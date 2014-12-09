@@ -3,11 +3,14 @@
 
 #include "error.h"
 #include "instr.h"
+#include "misc.h"
 
 #define DECODE_BUFFER_SIZE 8
+#define FETCH_CYCLES 1
 
 typedef struct {
   instr* instruction;
+  unsigned int cycles_left;
   void* next;
 } decode_buffer_entry;
 

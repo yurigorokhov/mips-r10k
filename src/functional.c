@@ -8,11 +8,18 @@ static instr* _next_instr_alu2 = NULL;
 static functional_entry* _curr_instr_alu1 = NULL;
 static functional_entry* _curr_instr_alu2 = NULL;
 
+// used during calc to record how many instructions will be added next cycle
+static unsigned int free_int_spots = 0;
+
 void __calc_functional_units() {
   
-  // pick items that will be executed from instruction queues
-  _next_instr_alu1 = instr_queue_get_ready_int_instr(0);
-  _next_instr_alu2 = instr_queue_get_ready_int_instr(1);
+  // pick items that will be executed from instruction queues if we have room
+  if(NULL == _curr_instr_alu1 || 1 == _curr_instr_alu1->cycles_left) {
+    _next_instr_alu1 = instr_queue_get_ready_int_instr(0); free_int_spots++;
+  }
+  if(NULL == _curr_instr_alu2 || 1 == _curr_instr_alu2->cycles_left) {
+    _next_instr_alu2 = instr_queue_get_ready_int_instr(1); free_int_spots++;
+  }
 }
 
 void __edge_functional_units() { 
@@ -22,20 +29,22 @@ void __edge_functional_units() {
     instr_queue_remove(_next_instr_alu1);
     _curr_instr_alu1 = malloc(sizeof(functional_entry));
     _curr_instr_alu1->instruction = _next_instr_alu1;
+    _curr_instr_alu1->cycles_left = FUNCTIONAL_INTEGER_CYCLES;
   }
   if(NULL == _curr_instr_alu2 && NULL != _next_instr_alu2) {
     instr_queue_remove(_next_instr_alu2);
     _curr_instr_alu2 = malloc(sizeof(functional_entry));
     _curr_instr_alu2->instruction = _next_instr_alu2;
+    _curr_instr_alu2->cycles_left = FUNCTIONAL_INTEGER_CYCLES;
   }
-
-  //if(_curr_instr_alu1 != NULL)
-  //printf("\nALU1: instr %i", _curr_instr_alu1->instruction->addr);
-  //if(_curr_instr_alu2 != NULL)
-  //printf("\nALU1: instr %i", _curr_instr_alu2->instruction->addr);
 
   // reset next
   _next_instr_alu1 = NULL;
   _next_instr_alu2 = NULL;
+  free_int_spots = 0;
+}
+
+unsigned int functional_free_int_spots_next_clock() {
+  return free_int_spots;
 }
 

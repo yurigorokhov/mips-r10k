@@ -16,29 +16,42 @@ error.h,334
 #define DECODE_BUFFER_FULL 15,284
 typedef int error_code;17,315
 
-active_list.h,136
+committer.h,25
+#define COMMITTER_H2,20
+
+committer.c,185
+static instr* __instructions_to_commit[__instructions_to_commit3,24
+static unsigned int __instructions_to_commit_size 4,92
+void __calc_committer(6,148
+void __edge_committer(18,534
+
+active_list.h,174
 #define ACTIVE_LIST_H2,22
 #define ACTIVE_LIST_SIZE 7,84
   instr* instruction;10,130
-  void* next;11,152
-} active_list_entry;12,166
+  char is_ready_on_next_clock;11,152
+  void* next;12,183
+} active_list_entry;13,197
 
-instr_queue.h,197
+instr_queue.h,263
 #define INSTR_QUEUE_H2,22
-#define INT_QUEUE_SIZE 9,125
-#define ADDR_QUEUE_SIZE 10,151
-#define FP_QUEUE_SIZE 11,178
-  instr* instruction;14,221
-  void* next;15,243
-} instr_queue_entry;16,257
+#define INT_QUEUE_SIZE 10,150
+#define ADDR_QUEUE_SIZE 11,176
+#define FP_QUEUE_SIZE 12,203
+#define DECODE_CYCLES 14,229
+  instr* instruction;17,271
+  unsigned int cycles_left;18,293
+  void* next;19,321
+} instr_queue_entry;20,335
 
-active_list.c,212
-static unsigned int size 3,26
-static active_list_entry* head 4,56
-active_list_entry* get_newest_entry(6,96
-char active_list_is_full(17,297
-char active_list_is_empty(24,392
-error_code active_list_add(28,455
+active_list.c,269
+static active_list_entry* head 3,26
+active_list_entry* get_newest_entry(5,66
+char active_list_is_full(16,267
+char active_list_is_empty(26,480
+error_code active_list_add(30,546
+instr* active_list_get_instr_ready(47,970
+void active_list_commit_instruction(63,1318
 
 instr_queue.c,500
 static instr_queue_entry* int_queue_head 4,43
@@ -52,14 +65,16 @@ void instr_queue_remove(46,923
 instr* instr_queue_get_ready_int_instr(66,1427
 void __calc_instr_queue(81,1799
 void insert_instruction(92,2130
-void __edge_instr_queue(105,2516
+void __edge_instr_queue(106,2554
 
-decode_buffer.h,142
+decode_buffer.h,205
 #define DECODE_BUFFER_H2,24
 #define DECODE_BUFFER_SIZE 7,88
-  instr* instruction;10,135
-  void* next;11,157
-} decode_buffer_entry;12,171
+#define FETCH_CYCLES 8,117
+  instr* instruction;11,158
+  unsigned int cycles_left;12,180
+  void* next;13,208
+} decode_buffer_entry;14,222
 
 decode_buffer.c,471
 static decode_buffer_entry* decode_buffer_head 3,28
@@ -68,10 +83,10 @@ static instr* __calc_scheduled_to_be_added[__calc_scheduled_to_be_added6,129
 static unsigned int __calc_scheduled_size 7,204
 char is_full(9,252
 void add_instruction(19,460
-error_code __calc_decode_buffer_add(33,922
-int __edge_decode_buffer_accept_instructions(41,1163
-instr* decode_buffer_get_next_ready_instr(54,1481
-void decode_buffer_remove_instruction(69,1835
+error_code __calc_decode_buffer_add(33,890
+int __edge_decode_buffer_accept_instructions(41,1131
+instr* decode_buffer_get_next_ready_instr(56,1526
+void decode_buffer_remove_instruction(73,1952
 
 frontend.c,225
 static instr** instruction_buffer;3,23
@@ -92,10 +107,11 @@ error_code sm_parse_op(71,1412
 error_code sm_parse_next_hex(78,1590
 instr_operation parse_op(103,2081
 
-functional.h,80
+functional.h,115
 #define FUNCTIONAL_H2,21
   instr* instruction;8,105
-} functional_entry;9,127
+  unsigned int cycles_left;9,127
+} functional_entry;10,155
 
 frontend.h,24
 #define FRONTEND_H2,19
@@ -144,10 +160,10 @@ error_code map_registers_for_instruction(21,370
 int get_phys_reg_mapping(36,809
 char reg_map_is_full(46,970
 
-backend.c,104
+backend.c,110
 static unsigned int backend_cycle 3,22
 static unsigned int pc_addr 4,61
-error_code backend_calc(6,95
+error_code backend_cycle_step(6,95
 
 error.c,28
 const char* get_error(3,20
