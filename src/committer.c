@@ -22,6 +22,12 @@ void __edge_committer() {
     while(i < __instructions_to_commit_size) {
       __instructions_to_commit[i]->stage = COMMITTED;
       active_list_commit_instruction(__instructions_to_commit[i]);
+
+      // return register to free list
+      if(__instructions_to_commit[i]->rd != UINT_MAX) {
+	reg_map_free_by_logical(__instructions_to_commit[i]->rd);
+      }
+      i++;
     }
     __instructions_to_commit_size = 0;
   }

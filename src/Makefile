@@ -94,7 +94,7 @@ am_mipsr10k_OBJECTS = mipsr10k.$(OBJEXT) instr.$(OBJEXT) \
 	error.$(OBJEXT) frontend.$(OBJEXT) backend.$(OBJEXT) \
 	reg_map.$(OBJEXT) instr_queue.$(OBJEXT) active_list.$(OBJEXT) \
 	decode_buffer.$(OBJEXT) functional.$(OBJEXT) \
-	committer.$(OBJEXT)
+	committer.$(OBJEXT) misc.$(OBJEXT) fetch_stage.$(OBJEXT)
 mipsr10k_OBJECTS = $(am_mipsr10k_OBJECTS)
 mipsr10k_DEPENDENCIES =
 AM_V_P = $(am__v_P_$(V))
@@ -237,7 +237,7 @@ top_build_prefix = ../
 top_builddir = ..
 top_srcdir = ..
 AM_CXXFLAGS = $(INTI_CFLAGS)
-mipsr10k_SOURCES = mipsr10k.c instr.c instr.h error.c error.h frontend.c frontend.h backend.c backend.h reg_map.c reg_map.h instr_queue.c instr_queue.h active_list.c active_list.h decode_buffer.h decode_buffer.c functional.h functional.c committer.h committer.c
+mipsr10k_SOURCES = mipsr10k.c instr.c instr.h error.c error.h frontend.c frontend.h backend.c backend.h reg_map.c reg_map.h instr_queue.c instr_queue.h active_list.c active_list.h decode_buffer.h decode_buffer.c functional.h functional.c committer.h committer.c misc.h misc.c fetch_stage.h fetch_stage.c
 mipsr10k_LDADD = $(INTI_LIBS)
 all: all-am
 
@@ -331,11 +331,13 @@ include ./$(DEPDIR)/backend.Po
 include ./$(DEPDIR)/committer.Po
 include ./$(DEPDIR)/decode_buffer.Po
 include ./$(DEPDIR)/error.Po
+include ./$(DEPDIR)/fetch_stage.Po
 include ./$(DEPDIR)/frontend.Po
 include ./$(DEPDIR)/functional.Po
 include ./$(DEPDIR)/instr.Po
 include ./$(DEPDIR)/instr_queue.Po
 include ./$(DEPDIR)/mipsr10k.Po
+include ./$(DEPDIR)/misc.Po
 include ./$(DEPDIR)/reg_map.Po
 
 .c.o:

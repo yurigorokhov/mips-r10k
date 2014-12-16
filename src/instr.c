@@ -57,8 +57,9 @@ error_code parse_instruction(char* str, instr** res, unsigned int addr) {
   (*res)->rs = rs;
   (*res)->rt = rt;
   (*res)->rd = rd;
-  (*res)->extra = rd;
+  (*res)->extra = extra;
   (*res)->addr = addr;
+  (*res)->original_str = str;
   (*res)->stage = NONE;
   return SUCCESS;
 }
@@ -79,18 +80,16 @@ error_code sm_parse_next_hex(char** c, unsigned int* r) {
   
   // find the last char
   skip_whitespace(&(*c));
-  char regStr[10];
-  regStr[0] = '0';
-  regStr[1] = 'x';
-  unsigned short idx = 2;
+  char regStr[11];
+  unsigned short idx = 0;
   while(' ' != (**c) && '\0' != (**c)) {
-    if(idx > 8) {
+    if(idx > 10) {
       return IDX_OVERFLOW;
     }
     regStr[idx] = **c;
     (*c)++; idx++;
   };
-  if(idx == 2) {
+  if(idx == 0) {
     return INSTR_PARSING_ERROR;
   }
   regStr[idx] = '\0';
@@ -122,5 +121,26 @@ instr_operation parse_op(char c) {
     return FPMUL;
   default: 
     return UNKNOWN;
+  }
+}
+
+const char* get_str(instr_stage stage) {
+  switch(stage) {
+  case NONE:
+    return " ";
+  case FETCH:
+    return "F";
+  case DECODE:
+    return "D";
+  case ISSUE: 
+    return "I";
+  case EXECUTE:
+    return "E";
+  case FINISHED:
+    return "FI";
+  case COMMITTED:
+    return "C";
+  default:
+    return "UNKNOWN";
   }
 }

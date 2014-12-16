@@ -1,51 +1,90 @@
 #include "reg_map.h"
 
-static unsigned int PHYS_REGS_VALS[PHYS_REGS];
+void add_to_free_list(phys_reg);
+void add_to_busy_list(phys_reg physical, logi_reg logical, instr*);
 
-//TODO: may be better to inverse this mapping
-static unsigned int REG_MAP[PHYS_REGS] = { UINT_MAX };
+free_list_entry* free_list = NULL;
+busy_list_entry* busy_list = NULL;
 
-//--- Functions ---
-int get_free_phys_register() {
+void reg_map_init() {
   
-  //TODO: is reg0 valid?
-  int i;
+  // populate free list
+  unsigned int i;
   for(i = 0; i < PHYS_REGS; ++i) {
-    if(UINT_MAX != REG_MAP[i]) {
-      return i;
-    }
+    add_to_free_list((phys_reg)i);
   }
-  return -1;
 }
 
-error_code map_registers_for_instruction(instr *instruction) {
-  
-  // if this instruction has a destination, we need to map it to a reg
-  if(instruction->rd != UINT_MAX) {
-    int free_phys_reg = get_free_phys_register();
-    if(-1 == free_phys_reg) {
-      return REGISTER_MAP_FULL;
-    }
-    
-    // map the free physical register to the instructions arch register
-    REG_MAP[free_phys_reg] = instruction->rd;
-  }
-  return SUCCESS;
+phys_reg reg_map_assign(instr* instruction) {
+  phys_reg physical = free_list->physical;
+  //TODO: printf("\nassigning phys %i", physical);
+
+  // remove from free list
+  free_list_entry* old_head = free_list;
+  free_list = free_list->next;
+  free(old_head);
+
+  // add to busy list
+  add_to_busy_list(physical, instruction->rd, instruction);
+  return physical;
 }
 
-int get_phys_reg_mapping(uint arch_reg) {
-  int i;
-  for(i = 0; i < PHYS_REGS; i++) {
-    if(arch_reg == REG_MAP[i]) {
-      return i;
-    }
+void add_to_free_list(phys_reg reg_num) {
+  free_list_entry* entry = malloc(sizeof(free_list_entry));
+  entry->next = NULL;
+  entry->physical = reg_num;
+  if(NULL == free_list) {
+    free_list = entry;
+  } else {
+    free_list_entry* current = free_list;
+    while(NULL != current->next) { current = current->next; }
+    current->next = entry;
   }
-  return -1;
 }
 
-char reg_map_is_full() {
-  if(-1 == get_free_phys_register()) {
-    return 1;
+void add_to_busy_list(phys_reg physical, logi_reg logical, instr* instruction) {
+  busy_list_entry* entry = malloc(sizeof(busy_list_entry));
+  entry->next = NULL;
+  entry->physical = physical;
+  entry->logical = logical;
+  entry->instruction_writing = instruction;
+  if(NULL == busy_list) {
+    busy_list = entry;
+  } else {
+    busy_list_entry* current = busy_list;
+    while(NULL != current->next) { current = current->next; }
+    current->next = entry;
   }
-  return 0;
+}
+
+instr* reg_map_get_latest_instr_writing_to(logi_reg logical, unsigned int before_addr) {
+  busy_list_entry* current = busy_list;
+  busy_list_entry* prev = NULL;
+  while(NULL != current) {
+    if(current->logical == logical && current->instruction_writing->addr < before_addr) {
+      prev = current;
+    }
+    current = current->next;
+  }
+  if(NULL == prev) return NULL;
+  return prev->instruction_writing;
+}
+
+void reg_map_free_by_logical(logi_reg logical) {
+  busy_list_entry* current = busy_list;
+  busy_list_entry* prev = NULL;
+  while(NULL != current && current->logical != logical) {
+    prev = current;
+    current = current->next;
+  }
+  if(NULL == current) return;
+
+  // add to free list
+  add_to_free_list(current->logical);
+  if(current = busy_list) {
+    busy_list = current->next;
+  } else {
+    prev->next = current->next;
+  }
+  free(current);
 }

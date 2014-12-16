@@ -1,7 +1,11 @@
 
-backend.h,66
+backend.h,179
 #define BACKEND_H2,18
 #define BACKEND_DISPATCH_PER_CYCLE 13,236
+  instr* instruction;17,298
+  unsigned int cycle_num;18,320
+  void* next;19,346
+} instr_history_entry;20,360
 
 error.h,334
 #define ERROR_H2,16
@@ -19,104 +23,141 @@ typedef int error_code;17,315
 committer.h,25
 #define COMMITTER_H2,20
 
-committer.c,185
+committer.c,239
 static instr* __instructions_to_commit[__instructions_to_commit3,24
 static unsigned int __instructions_to_commit_size 4,92
 void __calc_committer(6,148
-void __edge_committer(18,534
+void __edge_committer(19,545
+unsigned int how_many_will_commit_next_clock(36,1030
 
-active_list.h,174
+active_list.h,204
 #define ACTIVE_LIST_H2,22
-#define ACTIVE_LIST_SIZE 7,84
-  instr* instruction;10,130
-  char is_ready_on_next_clock;11,152
-  void* next;12,183
-} active_list_entry;13,197
+#define ACTIVE_LIST_SIZE 11,167
+  instr* instruction;14,213
+  char is_ready_on_next_clock;15,235
+  phys_reg physical;16,266
+  void* next;17,287
+} active_list_entry;18,301
 
-instr_queue.h,263
+instr_queue.h,262
 #define INSTR_QUEUE_H2,22
-#define INT_QUEUE_SIZE 10,150
-#define ADDR_QUEUE_SIZE 11,176
-#define FP_QUEUE_SIZE 12,203
-#define DECODE_CYCLES 14,229
-  instr* instruction;17,271
-  unsigned int cycles_left;18,293
-  void* next;19,321
-} instr_queue_entry;20,335
+#define INT_QUEUE_SIZE 12,189
+#define ADDR_QUEUE_SIZE 13,215
+#define FP_QUEUE_SIZE 14,242
+#define ISSUE_CYCLES 16,268
+  instr* instruction;19,309
+  unsigned int cycles_left;20,331
+  void* next;21,359
+} instr_queue_entry;22,373
 
-active_list.c,269
+active_list.c,485
 static active_list_entry* head 3,26
 active_list_entry* get_newest_entry(5,66
-char active_list_is_full(16,267
-char active_list_is_empty(26,480
-error_code active_list_add(30,546
-instr* active_list_get_instr_ready(47,970
-void active_list_commit_instruction(63,1318
+unsigned int size(14,257
+char active_list_is_full(24,431
+char active_list_is_empty(28,510
+error_code active_list_add(32,576
+void active_list_set_instr_ready(55,1164
+bool active_list_is_instr_ready(67,1467
+instr* active_list_get_instr_ready(79,1802
+void active_list_commit_instruction(98,2214
+unsigned int active_list_how_many_spots_next_clock(114,2624
+void active_list_handle_mispredict(118,2777
 
-instr_queue.c,500
-static instr_queue_entry* int_queue_head 4,43
-static instr_queue_entry* addr_queue_head 7,110
-static instr_queue_entry* fp_queue_head 10,185
-static instr* _queue_lookahead[_queue_lookahead12,234
-static size_t _queue_lookahead_size 13,305
-size_t get_queue_size(16,367
-instr_queue_entry** get_queue_by_type(26,534
-void instr_queue_remove(46,923
-instr* instr_queue_get_ready_int_instr(66,1427
-void __calc_instr_queue(81,1799
-void insert_instruction(92,2130
-void __edge_instr_queue(106,2554
+instr_queue.c,701
+static instr_queue_entry* int_queue_head 6,97
+static instr_queue_entry* addr_queue_head 9,164
+static instr_queue_entry* fp_queue_head 12,239
+static instr* _queue_lookahead[_queue_lookahead14,288
+static size_t _queue_lookahead_size 15,359
+size_t get_queue_size(18,421
+instr_queue_entry** get_queue_by_type(28,588
+void instr_queue_remove(46,963
+bool will_instr_inputs_be_ready(66,1467
+instr* instr_queue_get_ready_int_instr(83,2037
+void __calc_instr_queue(106,2587
+void insert_instruction(118,2993
+void __edge_instr_queue(144,3686
+unsigned int instr_queue_free_int_spots_next_clock(177,4623
+void instr_queue_handle_mispredict_helper(182,4802
+void instr_queue_handle_mispredict(202,5296
 
-decode_buffer.h,205
+fetch_stage.h,167
+#define FETCH_STAGE_H2,22
+#define FETCH_CYCLES 7,86
+  instr* instruction;10,127
+  unsigned int cycles_left;11,149
+  void* next;12,177
+} fetch_stage_entry;13,191
+
+decode_buffer.h,209
 #define DECODE_BUFFER_H2,24
-#define DECODE_BUFFER_SIZE 7,88
-#define FETCH_CYCLES 8,117
-  instr* instruction;11,158
-  unsigned int cycles_left;12,180
-  void* next;13,208
-} decode_buffer_entry;14,222
+#define DECODE_BUFFER_SIZE 10,152
+#define DECODE_CYCLES 11,181
+  instr* instruction;14,223
+  unsigned int cycles_left;15,245
+  void* next;16,273
+} decode_buffer_entry;17,287
 
-decode_buffer.c,471
+fetch_stage.c,193
+static fetch_stage_entry* head 3,26
+unsigned int __calc_fetch_stage(5,66
+void __edge_fetch_stage_add_instr(12,277
+instr* fetch_get_ready_instr(27,714
+void fetch_stage_remove_instr(43,1046
+
+decode_buffer.c,484
 static decode_buffer_entry* decode_buffer_head 3,28
-static unsigned int decode_buffer_size 4,84
-static instr* __calc_scheduled_to_be_added[__calc_scheduled_to_be_added6,129
-static unsigned int __calc_scheduled_size 7,204
-char is_full(9,252
-void add_instruction(19,460
-error_code __calc_decode_buffer_add(33,890
-int __edge_decode_buffer_accept_instructions(41,1131
-instr* decode_buffer_get_next_ready_instr(56,1526
-void decode_buffer_remove_instruction(73,1952
+static instr* __calc_scheduled_to_be_added[__calc_scheduled_to_be_added5,85
+static unsigned int __calc_scheduled_size 6,160
+unsigned int get_size(8,208
+bool is_full(18,393
+void add_instruction(22,473
+void __calc_decode_buffer(37,935
+void __edge_decode_buffer(45,1182
+instr* decode_buffer_get_next_ready_instr(62,1663
+void decode_buffer_remove_instruction(79,2089
+unsigned int decode_buffer_free_spots_next_clock(95,2544
 
-frontend.c,225
+misc.c,23
+unsigned int min(3,19
+
+frontend.c,272
 static instr** instruction_buffer;3,23
 static unsigned int idx 4,58
 static unsigned int capacity 5,87
 void frontend_init(7,122
 void frontend_enqueue(12,245
 void frontend_clean(21,490
-error_code frontend_getinsr(25,545
+error_code frontend_getinstr(29,629
+unsigned int frontend_get_instr_count(37,810
 
-mipsr10k.c,16
-int main(9,141
+mipsr10k.c,45
+int main(11,190
+void print_history(61,1437
 
-instr.c,171
+instr.c,201
 error_code parse_instruction(9,213
-void skip_whitespace(67,1338
-error_code sm_parse_op(71,1412
-error_code sm_parse_next_hex(78,1590
-instr_operation parse_op(103,2081
+void skip_whitespace(68,1371
+error_code sm_parse_op(72,1445
+error_code sm_parse_next_hex(79,1623
+instr_operation parse_op(102,2077
+const char* get_str(127,2419
 
-functional.h,115
+functional.h,158
 #define FUNCTIONAL_H2,21
-  instr* instruction;8,105
-  unsigned int cycles_left;9,127
-} functional_entry;10,155
+#define FUNCTIONAL_INTEGER_CYCLES 8,109
+  instr* instruction;11,163
+  unsigned int cycles_left;12,185
+} functional_entry;13,213
+
+misc.h,20
+#define MISC_H2,15
 
 frontend.h,24
 #define FRONTEND_H2,19
 
-instr.h,524
+instr.h,559
 #define INSTR_HEADER2,21
   NONE,13,192
   FETCH,14,200
@@ -135,40 +176,62 @@ instr.h,524
   UNKNOWN 29,350
 } instr_operation;30,415
 typedef unsigned int reg;32,435
-  instr_operation op;35,479
-  reg rs;36,501
-  reg rt;37,523
-  reg rd;38,545
-  unsigned int extra;39,570
-  unsigned int addr;42,665
-  instr_stage stage;43,686
-} instr;44,707
+  const char* original_str;35,479
+  instr_operation op;36,507
+  reg rs;37,529
+  reg rt;38,551
+  reg rd;39,573
+  unsigned int extra;40,598
+  unsigned int addr;43,693
+  instr_stage stage;44,714
+} instr;45,735
 
-functional.c,246
+functional.c,348
 static instr* _next_instr_alu1 4,59
 static instr* _next_instr_alu2 5,98
 static functional_entry* _curr_instr_alu1 8,174
 static functional_entry* _curr_instr_alu2 9,224
-void __calc_functional_units(11,275
-void __edge_functional_units(18,490
+static unsigned int free_int_spots 12,352
+void __calc_functional_units(14,393
+void __edge_functional_units(25,827
+unsigned int functional_free_int_spots_next_clock(70,2635
 
-reg_map.c,244
-static unsigned int PHYS_REGS_VALS[PHYS_REGS_VALS3,22
-static unsigned int REG_MAP[REG_MAP6,116
-int get_free_phys_register(9,192
-error_code map_registers_for_instruction(21,370
-int get_phys_reg_mapping(36,809
-char reg_map_is_full(46,970
+reg_map.c,276
+free_list_entry* free_list 6,124
+busy_list_entry* busy_list 7,159
+void reg_map_init(9,195
+phys_reg reg_map_assign(18,339
+void add_to_free_list(32,702
+void add_to_busy_list(45,1053
+instr* reg_map_get_latest_instr_writing_to(60,1516
+void reg_map_free_by_logical(73,1926
 
-backend.c,110
+backend.c,382
 static unsigned int backend_cycle 3,22
 static unsigned int pc_addr 4,61
-error_code backend_cycle_step(6,95
+static instr* instr_mispredicted 5,94
+static instr_history_entry** history;8,189
+void backend_init(12,260
+void backend_branch_mispredict(23,530
+error_code backend_cycle_step(27,622
+unsigned int record_history(70,1637
+instr_history_entry** get_history(112,2822
+unsigned int backend_get_cycle(116,2881
 
 error.c,28
 const char* get_error(3,20
 
-reg_map.h,71
+reg_map.h,361
 #define REGMAP_H2,17
-#define PHYS_REGS 8,94
-#define LOGI_REGS 9,115
+#define PHYS_REGS 8,96
+#define LOGI_REGS 9,117
+typedef unsigned int phys_reg;11,139
+typedef unsigned int logi_reg;12,170
+  phys_reg physical;15,219
+  void* next;16,240
+} free_list_entry;17,254
+  phys_reg physical;20,291
+  logi_reg logical;21,312
+  instr* instruction_writing;22,332
+  void* next;23,362
+} busy_list_entry;24,376

@@ -1,6 +1,7 @@
 #ifndef FUNCTIONAL_H
 #define FUNCTIONAL_H
 
+#include "backend.h"
 #include "instr_queue.h"
 #include "instr.h"
 

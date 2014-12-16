@@ -3,9 +3,7 @@
 static active_list_entry* head = NULL;
 
 active_list_entry* get_newest_entry() {
-  if(NULL == head) {
-    return NULL;
-  }
+  if(NULL == head) return NULL;
   active_list_entry* newest = head;
   while(newest->next != NULL) {
     newest = newest->next;
@@ -18,9 +16,9 @@ unsigned int size() {
   active_list_entry* current = head;
   while(NULL != current) {
     current = current->next;
-    ++i;
+    ++size;
   }
-  return i;
+  return size;
 }
 
 char active_list_is_full() {
@@ -35,10 +33,16 @@ error_code active_list_add(instr* instruction) {
   if(active_list_is_full()) {
     return ACTIVE_LIST_FULL;
   }
+  
+  // TODO: maybe not branches?
+  // map the instruction to a physical register
+  phys_reg physical = reg_map_assign(instruction);
+
   active_list_entry* entry = malloc(sizeof(active_list_entry));
   entry->instruction = instruction;
   entry->next = NULL;
   entry->is_ready_on_next_clock = 0;
+  entry->physical = physical;
   active_list_entry* newest = get_newest_entry();
   if(NULL == newest) {
     head = entry;
@@ -46,6 +50,30 @@ error_code active_list_add(instr* instruction) {
     newest->next = entry;
   }
   return SUCCESS;
+}
+
+void active_list_set_instr_ready(instr* instruction) {
+  if(NULL == head) return;
+  active_list_entry* current = head;
+  while(NULL != current) {
+    if(current->instruction->addr == instruction->addr) {
+      current->is_ready_on_next_clock = 1;
+      return;
+    }
+    current = current->next;
+  }
+}
+
+bool active_list_is_instr_ready(instr* instruction) {
+  if(NULL == head) return false;
+  active_list_entry* current = head;
+  while(NULL != current) {
+    if(current->instruction->addr == instruction->addr) {
+      return (1 == current->is_ready_on_next_clock) ? true : false;
+    }
+    current = current->next;
+  }
+  return false;
 }
 
 instr* active_list_get_instr_ready(unsigned int skip) {
@@ -68,21 +96,49 @@ instr* active_list_get_instr_ready(unsigned int skip) {
 }
 
 void active_list_commit_instruction(instr* instruction) {
-  if(NULL == head) { return; }
   active_list_entry* current = head;
   active_list_entry* prev = current;
   while(NULL != current && current->instruction->addr != instruction->addr) {
     prev = current;
     current = current->next;
   }
+  if(NULL == current) return;
   if(current == head) {
     head = current->next;
   } else {
-    prev = current->next;
+    prev->next = current->next;
   }
   free(current);
 }
 
 unsigned int active_list_how_many_spots_next_clock() {
   return min(ACTIVE_LIST_SIZE - size() + how_many_will_commit_next_clock(), ACTIVE_LIST_SIZE);
+}
+
+void active_list_handle_mispredict(instr* instruction) {
+  
+  // remove any newer instructions
+  if(NULL == head) return;
+  active_list_entry* current = head;
+  active_list_entry* prev;
+  while(NULL != current) {
+    if(current->instruction->addr > instruction->addr) {
+      if(current == head) {
+	head = current->next;
+      } else {
+	prev->next = current->next;
+      }
+      if(current->instruction->rd != UINT_MAX) {
+
+	// free registers for these instructions
+	reg_map_free_by_logical(current->instruction->rd);
+      }
+      free(current);
+      current = prev->next;
+    } else {
+      prev = current;
+      current = prev->next;
+    }
+  }
+  
 }

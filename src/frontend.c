@@ -19,13 +19,21 @@ void frontend_enqueue(instr* instruction) {
 }
 
 void frontend_clean() {
+  unsigned int i;
+  for(i = 0; i < idx; ++i) {
+    free(instruction_buffer[i]);
+  }
   free(instruction_buffer);
 }
 
-error_code frontend_getinsr(unsigned int addr, instr** res) {
-  if(addr >= idx || addr < 1) {
+error_code frontend_getinstr(unsigned int addr, instr** res) {
+  if(addr > idx || addr < 1) {
     return IDX_OVERFLOW;
   }
   *res = instruction_buffer[addr-1];
   return SUCCESS;
+}
+
+unsigned int frontend_get_instr_count() {
+  return idx;
 }

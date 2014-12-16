@@ -1,5 +1,7 @@
 #include "instr_queue.h"
 
+bool will_instr_inputs_be_ready(instr* instruction);
+
 // integer queue
 static instr_queue_entry* int_queue_head = NULL;
 
@@ -26,6 +28,7 @@ size_t get_queue_size(instr_queue_entry *q) {
 instr_queue_entry** get_queue_by_type(instr* instruction, size_t* size) {
   switch(instruction->op) {
   case INTEGER:
+  case BRANCH:
     *size = INT_QUEUE_SIZE;
     return &int_queue_head;
   case LOAD:
@@ -36,9 +39,6 @@ instr_queue_entry** get_queue_by_type(instr* instruction, size_t* size) {
   case FPMUL:
     *size = FP_QUEUE_SIZE;
     return &fp_queue_head;
-  case BRANCH:
-
-    //TODO!!
     break;
   } 
 }
@@ -63,19 +63,44 @@ void instr_queue_remove(instr *instruction) {
   free(current);
 }
 
-instr* instr_queue_get_ready_int_instr(unsigned int skip) {
-  if(NULL == int_queue_head) { return NULL; }
-  instr_queue_entry* current = int_queue_head;
-  unsigned int i = 0;
-  while(NULL != current->next) { 
-    current = current->next; 
-    if(1) { //TODO: this should be a ready check
-      if(i == skip) {
-	return current->instruction;
-      }
-      ++i;
+bool will_instr_inputs_be_ready(instr* instruction) {
+  instr* writing_instr;
+  if(instruction->rs != UINT_MAX) {
+    writing_instr = reg_map_get_latest_instr_writing_to(instruction->rs, instruction->addr);
+    if(NULL != writing_instr && !active_list_is_instr_ready(writing_instr)) {
+      return false;
     }
   }
+  if(instruction->rt != UINT_MAX) {
+    writing_instr = reg_map_get_latest_instr_writing_to(instruction->rt, instruction->addr);
+    if(NULL != writing_instr && !active_list_is_instr_ready(writing_instr)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+instr* instr_queue_get_ready_int_instr(unsigned int skip, bool is_alu_1) {
+  if(NULL == int_queue_head) return NULL;
+  instr_queue_entry* current = int_queue_head;
+  unsigned int i = 0;
+  while(NULL != current) { 
+    if(1 == current->cycles_left
+       && will_instr_inputs_be_ready(current->instruction)) {
+      if(i == skip) {
+	
+	// only ALU1 can resolve branches
+	if(is_alu_1 || BRANCH != current->instruction->op) {
+	  return current->instruction;
+	}
+      } else {
+	++i;
+      }
+      
+    }
+    current = current->next;
+  }
+  return NULL;
 }
 
 void __calc_instr_queue() {
@@ -83,7 +108,8 @@ void __calc_instr_queue() {
   // get possible instructions that will fill the queue from decode buffer
   instr* next_instr;
   unsigned int i = 0;
-  while(i < BACKEND_DISPATCH_PER_CYCLE && NULL != (next_instr = decode_buffer_get_next_ready_instr(i))) {
+  unsigned int free_spots_next_clock = instr_queue_free_int_spots_next_clock();
+  while(i < free_spots_next_clock && NULL != (next_instr = decode_buffer_get_next_ready_instr(i))) {
     _queue_lookahead[_queue_lookahead_size++] = next_instr;
     ++i;
   }
@@ -92,14 +118,26 @@ void __calc_instr_queue() {
 void insert_instruction(instr* instruction, instr_queue_entry** queue) {
   instr_queue_entry* entry = malloc(sizeof(instr_queue_entry));
   entry->instruction = instruction;
-  entry->cycles_left = DECODE_CYCLES;
+  entry->cycles_left = ISSUE_CYCLES;
+  
+  // STAGE >> ISSUE
+  entry->instruction->stage = ISSUE;
   entry->next = NULL;
   if(NULL == *queue) {
     *queue = entry;
   } else {
-    instr_queue_entry* current = *queue;
-    while(NULL != current->next) { current = current->next; }
-    current->next = entry;
+
+    // if this is a branch, it gets priority so put it at the front
+    if(BRANCH == instruction->op) {
+      entry->next = *queue;
+      *queue = entry;
+    } else {
+
+      // schedule at the end
+      instr_queue_entry* current = *queue;
+      while(NULL != current->next) { current = current->next; }
+      current->next = entry;
+    }
   }
 }
 
@@ -138,4 +176,31 @@ void __edge_instr_queue() {
 
 unsigned int instr_queue_free_int_spots_next_clock() {
   return min(INT_QUEUE_SIZE - get_queue_size(int_queue_head) + functional_free_int_spots_next_clock(), INT_QUEUE_SIZE);
+}
+
+
+void instr_queue_handle_mispredict_helper(unsigned int addr, instr_queue_entry** queue) {
+  if(NULL == *queue) return;
+  instr_queue_entry* current = *queue;
+  instr_queue_entry* prev;
+  while(NULL != current) {
+    if(current->instruction->addr > addr) {
+      if(*queue == current) {
+	*queue = current->next;
+      } else {
+	prev->next = current->next;
+      }
+      free(current);
+      current = current->next;
+    } else {
+      prev = current;
+      current = current->next;
+    }
+  }
+}
+
+void instr_queue_handle_mispredict(instr* instruction) {
+  instr_queue_handle_mispredict_helper(instruction->addr, &int_queue_head);
+  instr_queue_handle_mispredict_helper(instruction->addr, &addr_queue_head);
+  instr_queue_handle_mispredict_helper(instruction->addr, &fp_queue_head);
 }

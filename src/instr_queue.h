@@ -2,6 +2,7 @@
 #define INSTR_QUEUE_H
 
 #include <limits.h>
+#include <stdbool.h>
 #include "instr.h"
 #include "error.h"
 #include "backend.h"
@@ -12,7 +13,7 @@
 #define ADDR_QUEUE_SIZE 16
 #define FP_QUEUE_SIZE 16
 
-#define DECODE_CYCLES 1
+#define ISSUE_CYCLES 1
 
 typedef struct {
   instr* instruction;
@@ -23,7 +24,8 @@ typedef struct {
 void __calc_instr_queue();
 void __edge_instr_queue();
 void instr_queue_remove(instr *);
-instr* instr_queue_get_ready_int_instr(unsigned int skip);
+instr* instr_queue_get_ready_int_instr(unsigned int skip, bool is_alu_1);
 unsigned int instr_queue_free_int_spots_next_clock();
+void instr_queue_handle_mispredict(instr*);
 
 #endif

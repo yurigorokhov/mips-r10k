@@ -5,25 +5,26 @@ static decode_buffer_entry* decode_buffer_head = NULL;
 static instr* __calc_scheduled_to_be_added[DECODE_BUFFER_SIZE] = { NULL };
 static unsigned int __calc_scheduled_size = 0;
 
-unsigned int size() {
+unsigned int get_size() {
   decode_buffer_entry* current = decode_buffer_head;
   unsigned int i = 0;
-  while(current != NULL) {
+  while(NULL != current) {
     current = current->next;
     ++i;
   }
   return i;
 }
 
-char is_full() {
-  return (DECODE_BUFFER_SIZE == size()) ? 1 : 0;
+bool is_full() {
+  return (DECODE_BUFFER_SIZE == get_size()) ? true : false;
 }
 
 void add_instruction(instr* instruction) {
   decode_buffer_entry* entry = malloc(sizeof(decode_buffer_entry));
+  instruction->stage = DECODE;
   entry->instruction = instruction;
   entry->next = NULL;
-  entry->cycles_left = FETCH_CYCLES;
+  entry->cycles_left = DECODE_CYCLES;
   if(NULL == decode_buffer_head) {
     decode_buffer_head = entry;
     return;
@@ -33,27 +34,29 @@ void add_instruction(instr* instruction) {
   current->next = entry;
 }
 
-error_code __calc_decode_buffer_add(instr* instruction) {
-  if(DECODE_BUFFER_SIZE - 1 == __calc_scheduled_size) {
-    return DECODE_BUFFER_FULL;
+void __calc_decode_buffer() {
+  instr* instruction;
+  while(NULL != (instruction = (instr*)fetch_get_ready_instr(__calc_scheduled_size))) {
+    __calc_scheduled_to_be_added[__calc_scheduled_size] = instruction;
+    __calc_scheduled_size++;
   }
-  __calc_scheduled_to_be_added[__calc_scheduled_size++] = instruction;
-  return SUCCESS;
 }
 
-int __edge_decode_buffer_accept_instructions() {
-  int i = 0;
+void __edge_decode_buffer() {
+  unsigned int i = 0;
   if(__calc_scheduled_size > 0) {
     while(i < __calc_scheduled_size && !is_full()) {
       add_instruction(__calc_scheduled_to_be_added[i]);
       
-      // instruction is being added to decode buffer >> FETCH
-      __calc_scheduled_to_be_added[i]->stage = FETCH;
+      // instruction is being added to decode buffer >> DECODE
+      __calc_scheduled_to_be_added[i]->stage = DECODE;
+      
+      // remove from fetch buffer
+      fetch_stage_remove_instr(__calc_scheduled_to_be_added[i]);
       ++i;
     }
     __calc_scheduled_size = 0;
   }
-  return i;
 }
 
 instr* decode_buffer_get_next_ready_instr(unsigned int skip) {
@@ -75,14 +78,12 @@ instr* decode_buffer_get_next_ready_instr(unsigned int skip) {
 
 void decode_buffer_remove_instruction(instr* instruction) {
   decode_buffer_entry* current = decode_buffer_head;
-  decode_buffer_entry* prev = current;
+  decode_buffer_entry* prev = NULL;
   while(NULL != current && current->instruction->addr != instruction->addr) {
     prev = current;
     current = current->next;
   }
-  if(NULL == current) {
-    return;
-  }
+  if(NULL == current) return;
   if(current == decode_buffer_head) {
     decode_buffer_head = current->next;
   } else {
@@ -93,6 +94,6 @@ void decode_buffer_remove_instruction(instr* instruction) {
 
 unsigned int decode_buffer_free_spots_next_clock() {
   unsigned int capacity_downstream = min(active_list_how_many_spots_next_clock(), instr_queue_free_int_spots_next_clock());
-  unsigned int capacity = DECODE_BUFFER_SIZE - size() + capacity_downstream;
+  unsigned int capacity = DECODE_BUFFER_SIZE - get_size() + capacity_downstream;
   return min(DECODE_BUFFER_SIZE, capacity);
 }
