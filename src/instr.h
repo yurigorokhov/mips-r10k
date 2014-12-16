@@ -47,6 +47,6 @@ typedef struct {
 
 //--- Functions ---
 error_code parse_instruction(char* str, instr** outInstr, unsigned int);
-const char* get_str(instr_stage stage);
+const char* get_str(instr_stage stage, instr_operation);
 
 #endif

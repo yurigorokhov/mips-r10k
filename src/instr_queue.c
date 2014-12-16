@@ -80,6 +80,22 @@ bool will_instr_inputs_be_ready(instr* instruction) {
   return true;
 }
 
+instr* instr_queue_get_ready_addr_instr() {
+  if(NULL == addr_queue_head) return NULL;
+  instr_queue_entry* current = addr_queue_head;
+
+  // skip those that are not in issue stage
+  while(current != NULL && current->instruction->stage >= EXECUTE) { 
+    current = current->next;
+  }
+  if(NULL == current) return NULL;
+  // TODO: can we execute out of order?
+  // always process the next load/store in order
+  if(current->cycles_left > 1 
+     || !will_instr_inputs_be_ready(current->instruction)) return NULL;
+  return current->instruction;
+}
+
 instr* instr_queue_get_ready_int_instr(unsigned int skip, bool is_alu_1) {
   if(NULL == int_queue_head) return NULL;
   instr_queue_entry* current = int_queue_head;
@@ -176,6 +192,10 @@ void __edge_instr_queue() {
 
 unsigned int instr_queue_free_int_spots_next_clock() {
   return min(INT_QUEUE_SIZE - get_queue_size(int_queue_head) + functional_free_int_spots_next_clock(), INT_QUEUE_SIZE);
+}
+
+unsigned int instr_queue_free_addr_spots_next_clock() {
+  return min(ADDR_QUEUE_SIZE - get_queue_size(addr_queue_head) + how_many_addr_will_commit_next_clock(), ADDR_QUEUE_SIZE);
 }
 
 

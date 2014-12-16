@@ -93,7 +93,30 @@ void decode_buffer_remove_instruction(instr* instruction) {
 }
 
 unsigned int decode_buffer_free_spots_next_clock() {
-  unsigned int capacity_downstream = min(active_list_how_many_spots_next_clock(), instr_queue_free_int_spots_next_clock());
-  unsigned int capacity = DECODE_BUFFER_SIZE - get_size() + capacity_downstream;
-  return min(DECODE_BUFFER_SIZE, capacity);
+  unsigned int free_active_list = active_list_how_many_spots_next_clock();
+  unsigned int free_int_spots = instr_queue_free_int_spots_next_clock();
+  unsigned int free_addr_spots = instr_queue_free_addr_spots_next_clock();
+  
+  unsigned int count = 0;
+  decode_buffer_entry* current = decode_buffer_head;
+  while(NULL != current && free_active_list > 0) {
+    switch(current->instruction->op) {
+    case INTEGER:
+    case BRANCH: //TODO: also check branch stack
+      if(0 == free_int_spots) goto exitloop;
+      free_int_spots--;
+      break;
+    case LOAD:
+    case STORE:
+      if(0 == free_addr_spots) goto exitloop;
+      free_addr_spots--;
+      break;
+      //TODO: floating point
+    }
+    current = current->next;
+    free_active_list--;
+    count++;
+  }
+exitloop:
+  return min(DECODE_BUFFER_SIZE,  DECODE_BUFFER_SIZE - get_size() + count);
 }

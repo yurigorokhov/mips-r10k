@@ -23,12 +23,13 @@ typedef int error_code;17,315
 committer.h,25
 #define COMMITTER_H2,20
 
-committer.c,239
+committer.c,298
 static instr* __instructions_to_commit[__instructions_to_commit3,24
 static unsigned int __instructions_to_commit_size 4,92
 void __calc_committer(6,148
 void __edge_committer(19,545
-unsigned int how_many_will_commit_next_clock(36,1030
+unsigned int how_many_will_commit_next_clock(42,1250
+unsigned int how_many_addr_will_commit_next_clock(46,1342
 
 active_list.h,204
 #define ACTIVE_LIST_H2,22
@@ -41,30 +42,30 @@ active_list.h,204
 
 instr_queue.h,262
 #define INSTR_QUEUE_H2,22
-#define INT_QUEUE_SIZE 12,189
-#define ADDR_QUEUE_SIZE 13,215
-#define FP_QUEUE_SIZE 14,242
-#define ISSUE_CYCLES 16,268
-  instr* instruction;19,309
-  unsigned int cycles_left;20,331
-  void* next;21,359
-} instr_queue_entry;22,373
+#define INT_QUEUE_SIZE 13,212
+#define ADDR_QUEUE_SIZE 14,238
+#define FP_QUEUE_SIZE 15,265
+#define ISSUE_CYCLES 17,291
+  instr* instruction;20,332
+  unsigned int cycles_left;21,354
+  void* next;22,382
+} instr_queue_entry;23,396
 
-active_list.c,485
+active_list.c,486
 static active_list_entry* head 3,26
 active_list_entry* get_newest_entry(5,66
 unsigned int size(14,257
 char active_list_is_full(24,431
 char active_list_is_empty(28,510
 error_code active_list_add(32,576
-void active_list_set_instr_ready(55,1164
-bool active_list_is_instr_ready(67,1467
-instr* active_list_get_instr_ready(79,1802
-void active_list_commit_instruction(98,2214
-unsigned int active_list_how_many_spots_next_clock(114,2624
-void active_list_handle_mispredict(118,2777
+void active_list_set_instr_ready(57,1224
+bool active_list_is_instr_ready(70,1562
+instr* active_list_get_instr_ready(82,1897
+void active_list_commit_instruction(101,2309
+unsigned int active_list_how_many_spots_next_clock(117,2719
+void active_list_handle_mispredict(121,2872
 
-instr_queue.c,701
+instr_queue.c,812
 static instr_queue_entry* int_queue_head 6,97
 static instr_queue_entry* addr_queue_head 9,164
 static instr_queue_entry* fp_queue_head 12,239
@@ -74,13 +75,15 @@ size_t get_queue_size(18,421
 instr_queue_entry** get_queue_by_type(28,588
 void instr_queue_remove(46,963
 bool will_instr_inputs_be_ready(66,1467
-instr* instr_queue_get_ready_int_instr(83,2037
-void __calc_instr_queue(106,2587
-void insert_instruction(118,2993
-void __edge_instr_queue(144,3686
-unsigned int instr_queue_free_int_spots_next_clock(177,4623
-void instr_queue_handle_mispredict_helper(182,4802
-void instr_queue_handle_mispredict(202,5296
+instr* instr_queue_get_ready_addr_instr(83,2037
+instr* instr_queue_get_ready_int_instr(99,2581
+void __calc_instr_queue(122,3131
+void insert_instruction(134,3537
+void __edge_instr_queue(160,4230
+unsigned int instr_queue_free_int_spots_next_clock(193,5167
+unsigned int instr_queue_free_addr_spots_next_clock(197,5345
+void instr_queue_handle_mispredict_helper(202,5528
+void instr_queue_handle_mispredict(222,6022
 
 fetch_stage.h,167
 #define FETCH_STAGE_H2,22
@@ -186,15 +189,17 @@ typedef unsigned int reg;32,435
   instr_stage stage;44,714
 } instr;45,735
 
-functional.c,348
+functional.c,439
 static instr* _next_instr_alu1 4,59
 static instr* _next_instr_alu2 5,98
-static functional_entry* _curr_instr_alu1 8,174
-static functional_entry* _curr_instr_alu2 9,224
-static unsigned int free_int_spots 12,352
-void __calc_functional_units(14,393
-void __edge_functional_units(25,827
-unsigned int functional_free_int_spots_next_clock(70,2635
+static instr* _next_instr_addr 6,137
+static functional_entry* _curr_instr_alu1 10,214
+static functional_entry* _curr_instr_alu2 11,264
+static functional_entry* _curr_instr_addr 12,314
+static unsigned int free_int_spots 15,442
+void __calc_functional_units(17,483
+void __edge_functional_units(31,1025
+unsigned int functional_free_int_spots_next_clock(86,3197
 
 reg_map.c,276
 free_list_entry* free_list 6,124
@@ -214,9 +219,9 @@ static instr_history_entry** history;8,189
 void backend_init(12,260
 void backend_branch_mispredict(23,530
 error_code backend_cycle_step(27,622
-unsigned int record_history(70,1637
-instr_history_entry** get_history(112,2822
-unsigned int backend_get_cycle(116,2881
+unsigned int record_history(71,1676
+instr_history_entry** get_history(113,2861
+unsigned int backend_get_cycle(117,2920
 
 error.c,28
 const char* get_error(3,20

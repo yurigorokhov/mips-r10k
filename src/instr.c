@@ -124,7 +124,7 @@ instr_operation parse_op(char c) {
   }
 }
 
-const char* get_str(instr_stage stage) {
+const char* get_str(instr_stage stage, instr_operation op) {
   switch(stage) {
   case NONE:
     return " ";
@@ -135,7 +135,7 @@ const char* get_str(instr_stage stage) {
   case ISSUE: 
     return "I";
   case EXECUTE:
-    return "E";
+    return (op == LOAD || op == STORE) ? "A" : "E";
   case FINISHED:
     return "FI";
   case COMMITTED:

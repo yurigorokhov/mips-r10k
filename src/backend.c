@@ -30,6 +30,7 @@ error_code backend_cycle_step() {
   // check if we had a mispredict last cycle
   if(NULL != instr_mispredicted) {
     
+    //TODO: this needs to be finished!
     active_list_handle_mispredict(instr_mispredicted);
     instr_queue_handle_mispredict(instr_mispredicted);
     // clean reg_map

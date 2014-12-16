@@ -34,9 +34,11 @@ error_code active_list_add(instr* instruction) {
     return ACTIVE_LIST_FULL;
   }
   
-  // TODO: maybe not branches?
   // map the instruction to a physical register
-  phys_reg physical = reg_map_assign(instruction);
+  phys_reg physical = UINT_MAX;
+  if(BRANCH != instruction->op && STORE != instruction->op) {
+    physical = reg_map_assign(instruction);
+  }
 
   active_list_entry* entry = malloc(sizeof(active_list_entry));
   entry->instruction = instruction;
@@ -58,6 +60,7 @@ void active_list_set_instr_ready(instr* instruction) {
   while(NULL != current) {
     if(current->instruction->addr == instruction->addr) {
       current->is_ready_on_next_clock = 1;
+      if(instruction->op == STORE)
       return;
     }
     current = current->next;

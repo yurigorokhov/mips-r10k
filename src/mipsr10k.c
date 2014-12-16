@@ -86,7 +86,7 @@ void print_history(unsigned int num_instr, unsigned int num_cycles) {
       if(stage == prev_stage) {
 	printf("%2s|", "");
       } else {
-	printf("%2s|", get_str(current->instruction->stage));
+	printf("%2s|", get_str(current->instruction->stage, current->instruction->op));
       }
       prev_stage = stage;
       current = current->next;
