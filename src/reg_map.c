@@ -78,9 +78,7 @@ instr* reg_map_get_latest_instr_writing_to(logi_reg logical, unsigned int before
 }
 
 void reg_map_free_by_logical(logi_reg logical) {
-  if(logical == 0) {
-    return busy_list;
-  }
+  if(logical == 0) return;
   busy_list_entry* current = busy_list;
   busy_list_entry* prev = NULL;
   while(NULL != current && current->logical != logical) {
