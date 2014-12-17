@@ -15,7 +15,7 @@ typedef enum {
   DECODE,
   ISSUE,
   EXECUTE,
-  FINISHED,
+  FINISHED, MEM,
   COMMITTED
 } instr_stage;
 

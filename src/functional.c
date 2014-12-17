@@ -93,6 +93,9 @@ void __edge_functional_units() {
 	 current->instruction->stage = FINISHED;
       }
     }
+    if(current->cycles_left == 1 && (current->instruction->op == STORE || current->instruction->op == LOAD)) {
+      current->instruction->stage = MEM;
+    }
     current->cycles_left--;
     prev = current;
     current = current->next;

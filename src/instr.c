@@ -165,6 +165,8 @@ const char* get_str(instr_stage stage, instr_operation op) {
     return (op == LOAD || op == STORE) ? "A" : "E";
   case FINISHED:
     return "FI";
+  case MEM:
+    return "M";
   case COMMITTED:
     return "C";
   default:

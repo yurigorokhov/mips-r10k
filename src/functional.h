@@ -7,7 +7,7 @@
 
 #define FUNCTIONAL_INTEGER_CYCLES 1
 #define FUNCTIONAL_FP_CYCLES 3
-#define FUNCTIONAL_LOAD_STORE_CYCLES 1
+#define FUNCTIONAL_LOAD_STORE_CYCLES 2
 
 typedef struct {
   instr* instruction;

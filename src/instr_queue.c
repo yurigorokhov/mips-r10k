@@ -64,13 +64,13 @@ void instr_queue_remove(instr *instruction) {
 
 bool will_instr_inputs_be_ready(instr* instruction) {
   instr* writing_instr;
-  if(instruction->rs != UINT_MAX) {
+  if(instruction->rs != UINT_MAX && instruction->rs != 0) {
     writing_instr = reg_map_get_latest_instr_writing_to(instruction->rs, instruction->addr);
     if(NULL != writing_instr && !active_list_is_instr_ready(writing_instr)) {
       return false;
     }
   }
-  if(instruction->rt != UINT_MAX) {
+  if(instruction->rt != UINT_MAX && instruction->rt != 0) {
     writing_instr = reg_map_get_latest_instr_writing_to(instruction->rt, instruction->addr);
     if(NULL != writing_instr && !active_list_is_instr_ready(writing_instr)) {
       return false;

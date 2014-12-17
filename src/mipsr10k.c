@@ -9,6 +9,7 @@
 #include "misc.h"
 
 void print_history(unsigned int);
+bool is_empty(char* s);
 
 int main(int argc, char **argv) {
   if(argc != 2) {
@@ -34,12 +35,11 @@ int main(int argc, char **argv) {
     while(j < 80 && line_buffer[j] != '\n') { j++; }
     line_buffer[min(j, 79)] = '\0';
     
-    char* strcpy = malloc(sizeof(char)*(j+1));
-    memcpy(strcpy, line_buffer, j+1);
+    if(is_empty(&line_buffer)) continue;
 
     // parse instruction
     instr* parsed_instr;
-    code = parse_instruction(strcpy, &parsed_instr, i);
+    code = parse_instruction(&line_buffer, &parsed_instr, i);
     if(SUCCESS != code) {
       printf("%s: %i (%s)", get_error(code), i, line_buffer);
       exit(1);
@@ -58,6 +58,17 @@ int main(int argc, char **argv) {
   frontend_clean();
   print_history(backend_get_cycle());
   return 0;
+}
+
+bool is_empty(char* s) {
+  char* ptr = s;
+  while(*ptr != '\0') {
+    if(!isspace(*ptr)) {
+      return false;
+    }
+    ptr++;
+  }
+  return true;
 }
 
 void print_history(unsigned int num_cycles) {
