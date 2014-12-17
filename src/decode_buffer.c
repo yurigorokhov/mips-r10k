@@ -97,6 +97,7 @@ unsigned int decode_buffer_free_spots_next_clock() {
   unsigned int free_active_list = active_list_how_many_spots_next_clock();
   unsigned int free_int_spots = instr_queue_free_int_spots_next_clock();
   unsigned int free_addr_spots = instr_queue_free_addr_spots_next_clock();
+  unsigned int free_fp_spots = instr_queue_free_fp_spots_next_clock();
   unsigned int count = 0;
   decode_buffer_entry* current = decode_buffer_head;
   while(NULL != current && free_active_list > 0) {
@@ -111,7 +112,11 @@ unsigned int decode_buffer_free_spots_next_clock() {
       if(0 == free_addr_spots) goto exitloop;
       free_addr_spots--;
       break;
-      //TODO: floating point
+    case FPADD:
+    case FPMUL:
+      if(0 == free_fp_spots) goto exitloop;
+      free_fp_spots--;
+      break;
     }
     current = current->next;
     free_active_list--;

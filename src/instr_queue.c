@@ -97,6 +97,18 @@ instr* instr_queue_get_ready_addr_instr() {
   return current->instruction;
 }
 
+instr* instr_queue_get_ready_fp_instr() {
+  if(NULL == fp_queue_head) return NULL;
+  instr_queue_entry* current = fp_queue_head;
+  while(NULL != current) {
+    if(1 == current->cycles_left 
+       && will_instr_inputs_be_ready(current->instruction)) {
+      return current->instruction;
+    }
+    current = current->next;
+  }
+}
+
 instr* instr_queue_get_ready_int_instr(unsigned int skip, bool is_alu_1) {
   if(NULL == int_queue_head) return NULL;
   instr_queue_entry* current = int_queue_head;
@@ -127,16 +139,24 @@ void __calc_instr_queue() {
   unsigned int i = 0;
   unsigned int free_int_spots = instr_queue_free_int_spots_next_clock();
   unsigned int free_addr_spots = instr_queue_free_addr_spots_next_clock();
+  unsigned int free_fp_spots = instr_queue_free_fp_spots_next_clock();
   while(i < BACKEND_DISPATCH_PER_CYCLE
 	&& NULL != (next_instr = decode_buffer_get_next_ready_instr(i))) {
     switch(next_instr->op) {
     case INTEGER:
+    case BRANCH:
       if(0 == free_int_spots) goto exitloop;
       free_int_spots--;
       break;
-    case BRANCH:
+    case LOAD:
+    case STORE:
       if(0 == free_addr_spots) goto exitloop;
       free_addr_spots--;
+      break;
+    case FPADD:
+    case FPMUL:
+      if(0 == free_fp_spots) goto exitloop;
+      free_fp_spots--;
       break;
     }
     _queue_lookahead[_queue_lookahead_size++] = next_instr;
@@ -211,6 +231,10 @@ unsigned int instr_queue_free_int_spots_next_clock() {
 
 unsigned int instr_queue_free_addr_spots_next_clock() {
   return min(ADDR_QUEUE_SIZE - get_queue_size(addr_queue_head) + how_many_addr_will_commit_next_clock(), ADDR_QUEUE_SIZE);
+}
+
+unsigned int instr_queue_free_fp_spots_next_clock() {
+  return min(FP_QUEUE_SIZE - get_queue_size(fp_queue_head) + functional_free_fp_spots_next_clock(), FP_QUEUE_SIZE);
 }
 
 

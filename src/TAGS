@@ -65,25 +65,27 @@ void active_list_commit_instruction(101,2309
 unsigned int active_list_how_many_spots_next_clock(117,2719
 void active_list_handle_mispredict(121,2872
 
-instr_queue.c,814
+instr_queue.c,922
 static instr_queue_entry* int_queue_head 6,97
 static instr_queue_entry* addr_queue_head 9,164
 static instr_queue_entry* fp_queue_head 12,239
 static instr* _queue_lookahead[_queue_lookahead14,288
 static size_t _queue_lookahead_size 15,359
 size_t get_queue_size(18,421
-instr_queue_entry** get_queue_by_type(33,763
-void instr_queue_remove(51,1138
-bool will_instr_inputs_be_ready(72,1669
-instr* instr_queue_get_ready_addr_instr(89,2239
-instr* instr_queue_get_ready_int_instr(105,2783
-void __calc_instr_queue(128,3333
-void insert_instruction(153,4034
-void __edge_instr_queue(179,4727
-unsigned int instr_queue_free_int_spots_next_clock(212,5672
-unsigned int instr_queue_free_addr_spots_next_clock(216,5850
-void instr_queue_handle_mispredict_helper(221,6033
-void instr_queue_handle_mispredict(241,6527
+instr_queue_entry** get_queue_by_type(29,640
+void instr_queue_remove(47,1015
+bool will_instr_inputs_be_ready(67,1519
+instr* instr_queue_get_ready_addr_instr(84,2089
+instr* instr_queue_get_ready_fp_instr(100,2633
+instr* instr_queue_get_ready_int_instr(112,2962
+void __calc_instr_queue(135,3512
+void insert_instruction(169,4460
+void __edge_instr_queue(195,5153
+unsigned int instr_queue_free_int_spots_next_clock(228,6098
+unsigned int instr_queue_free_addr_spots_next_clock(232,6276
+unsigned int instr_queue_free_fp_spots_next_clock(236,6458
+void instr_queue_handle_mispredict_helper(241,6632
+void instr_queue_handle_mispredict(261,7126
 
 fetch_stage.h,167
 #define FETCH_STAGE_H2,22
@@ -147,12 +149,13 @@ error_code sm_parse_next_hex(79,1623
 instr_operation parse_op(102,2077
 const char* get_str(127,2419
 
-functional.h,158
+functional.h,194
 #define FUNCTIONAL_H2,21
 #define FUNCTIONAL_INTEGER_CYCLES 8,109
-  instr* instruction;11,163
-  unsigned int cycles_left;12,185
-} functional_entry;13,213
+#define FUNCTIONAL_FP_CYCLES 9,145
+  instr* instruction;12,194
+  unsigned int cycles_left;13,216
+} functional_entry;14,244
 
 misc.h,20
 #define MISC_H2,15
@@ -189,17 +192,21 @@ typedef unsigned int reg;32,435
   instr_stage stage;44,714
 } instr;45,735
 
-functional.c,439
+functional.c,625
 static instr* _next_instr_alu1 4,59
 static instr* _next_instr_alu2 5,98
 static instr* _next_instr_addr 6,137
-static functional_entry* _curr_instr_alu1 10,214
-static functional_entry* _curr_instr_alu2 11,264
-static functional_entry* _curr_instr_addr 12,314
-static unsigned int free_int_spots 15,442
-void __calc_functional_units(17,483
-void __edge_functional_units(31,1025
-unsigned int functional_free_int_spots_next_clock(86,3197
+static instr* _next_instr_fp 7,176
+static functional_entry* _curr_instr_alu1 10,250
+static functional_entry* _curr_instr_alu2 11,300
+static functional_entry* _curr_instr_addr 12,350
+static functional_entry* _curr_instr_fp 13,400
+static unsigned int free_int_spots 16,526
+static unsigned int free_fp_spots 17,566
+void __calc_functional_units(19,606
+void __edge_functional_units(36,1291
+unsigned int functional_free_int_spots_next_clock(109,4115
+unsigned int functional_free_fp_spots_next_clock(113,4197
 
 reg_map.c,276
 free_list_entry* free_list 6,124
