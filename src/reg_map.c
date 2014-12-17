@@ -17,7 +17,6 @@ void reg_map_init() {
 
 phys_reg reg_map_assign(instr* instruction) {
   phys_reg physical = free_list->physical;
-  //TODO: printf("\nassigning phys %i", physical);
 
   // remove from free list
   free_list_entry* old_head = free_list;

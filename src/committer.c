@@ -21,13 +21,15 @@ void __edge_committer() {
     unsigned int i = 0;
     while(i < __instructions_to_commit_size) {
       __instructions_to_commit[i]->stage = COMMITTED;
-      active_list_commit_instruction(__instructions_to_commit[i]);
 
       // if this is a load or store, we can remove from queue
       if(__instructions_to_commit[i]->op == STORE 
 	 || __instructions_to_commit[i]->op == LOAD) {
 	instr_queue_remove(__instructions_to_commit[i]);
       }
+
+      // commit in active list
+      active_list_commit_instruction(__instructions_to_commit[i]);
 
       // return register to free list
       if(__instructions_to_commit[i]->rd != UINT_MAX) {

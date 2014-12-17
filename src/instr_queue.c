@@ -17,9 +17,10 @@ static size_t _queue_lookahead_size = 0;
 //--- Functions ---
 size_t get_queue_size(instr_queue_entry *q) {
   if(NULL == q) { return 0; }
+  instr_queue_entry* current = q;
   size_t size = 0;
-  while(NULL != q) {
-    q = q->next;
+  while(NULL != current) {
+    current = current->next;
     ++size;
   }
   return size;
@@ -120,15 +121,29 @@ instr* instr_queue_get_ready_int_instr(unsigned int skip, bool is_alu_1) {
 }
 
 void __calc_instr_queue() {
-  
+
   // get possible instructions that will fill the queue from decode buffer
   instr* next_instr;
   unsigned int i = 0;
-  unsigned int free_spots_next_clock = instr_queue_free_int_spots_next_clock();
-  while(i < free_spots_next_clock && NULL != (next_instr = decode_buffer_get_next_ready_instr(i))) {
+  unsigned int free_int_spots = instr_queue_free_int_spots_next_clock();
+  unsigned int free_addr_spots = instr_queue_free_addr_spots_next_clock();
+  while(i < BACKEND_DISPATCH_PER_CYCLE
+	&& NULL != (next_instr = decode_buffer_get_next_ready_instr(i))) {
+    switch(next_instr->op) {
+    case INTEGER:
+      if(0 == free_int_spots) goto exitloop;
+      free_int_spots--;
+      break;
+    case BRANCH:
+      if(0 == free_addr_spots) goto exitloop;
+      free_addr_spots--;
+      break;
+    }
     _queue_lookahead[_queue_lookahead_size++] = next_instr;
     ++i;
   }
+exitloop:
+  return;
 }
 
 void insert_instruction(instr* instruction, instr_queue_entry** queue) {
@@ -181,7 +196,7 @@ void __edge_instr_queue() {
       decode_buffer_remove_instruction(_queue_lookahead[i]);
 
       // STAGE >> DECODE
-      _queue_lookahead[i]->stage = DECODE;
+      //TODO? _queue_lookahead[i]->stage = DECODE;
 
       // add to active list
       active_list_add(_queue_lookahead[i]);

@@ -36,7 +36,8 @@ void add_instruction(instr* instruction) {
 
 void __calc_decode_buffer() {
   instr* instruction;
-  while(NULL != (instruction = (instr*)fetch_get_ready_instr(__calc_scheduled_size))) {
+  while(__calc_scheduled_size < DECODE_BUFFER_SIZE 
+	&& NULL != (instruction = (instr*)fetch_get_ready_instr(__calc_scheduled_size))) {
     __calc_scheduled_to_be_added[__calc_scheduled_size] = instruction;
     __calc_scheduled_size++;
   }
@@ -96,7 +97,6 @@ unsigned int decode_buffer_free_spots_next_clock() {
   unsigned int free_active_list = active_list_how_many_spots_next_clock();
   unsigned int free_int_spots = instr_queue_free_int_spots_next_clock();
   unsigned int free_addr_spots = instr_queue_free_addr_spots_next_clock();
-  
   unsigned int count = 0;
   decode_buffer_entry* current = decode_buffer_head;
   while(NULL != current && free_active_list > 0) {

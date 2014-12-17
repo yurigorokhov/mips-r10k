@@ -28,8 +28,8 @@ static instr* __instructions_to_commit[__instructions_to_commit3,24
 static unsigned int __instructions_to_commit_size 4,92
 void __calc_committer(6,148
 void __edge_committer(19,545
-unsigned int how_many_will_commit_next_clock(42,1250
-unsigned int how_many_addr_will_commit_next_clock(46,1342
+unsigned int how_many_will_commit_next_clock(44,1282
+unsigned int how_many_addr_will_commit_next_clock(48,1374
 
 active_list.h,204
 #define ACTIVE_LIST_H2,22
@@ -65,25 +65,25 @@ void active_list_commit_instruction(101,2309
 unsigned int active_list_how_many_spots_next_clock(117,2719
 void active_list_handle_mispredict(121,2872
 
-instr_queue.c,812
+instr_queue.c,814
 static instr_queue_entry* int_queue_head 6,97
 static instr_queue_entry* addr_queue_head 9,164
 static instr_queue_entry* fp_queue_head 12,239
 static instr* _queue_lookahead[_queue_lookahead14,288
 static size_t _queue_lookahead_size 15,359
 size_t get_queue_size(18,421
-instr_queue_entry** get_queue_by_type(28,588
-void instr_queue_remove(46,963
-bool will_instr_inputs_be_ready(66,1467
-instr* instr_queue_get_ready_addr_instr(83,2037
-instr* instr_queue_get_ready_int_instr(99,2581
-void __calc_instr_queue(122,3131
-void insert_instruction(134,3537
-void __edge_instr_queue(160,4230
-unsigned int instr_queue_free_int_spots_next_clock(193,5167
-unsigned int instr_queue_free_addr_spots_next_clock(197,5345
-void instr_queue_handle_mispredict_helper(202,5528
-void instr_queue_handle_mispredict(222,6022
+instr_queue_entry** get_queue_by_type(33,763
+void instr_queue_remove(51,1138
+bool will_instr_inputs_be_ready(72,1669
+instr* instr_queue_get_ready_addr_instr(89,2239
+instr* instr_queue_get_ready_int_instr(105,2783
+void __calc_instr_queue(128,3333
+void insert_instruction(153,4034
+void __edge_instr_queue(179,4727
+unsigned int instr_queue_free_int_spots_next_clock(212,5672
+unsigned int instr_queue_free_addr_spots_next_clock(216,5850
+void instr_queue_handle_mispredict_helper(221,6033
+void instr_queue_handle_mispredict(241,6527
 
 fetch_stage.h,167
 #define FETCH_STAGE_H2,22
@@ -117,10 +117,10 @@ unsigned int get_size(8,208
 bool is_full(18,393
 void add_instruction(22,473
 void __calc_decode_buffer(37,935
-void __edge_decode_buffer(45,1182
-instr* decode_buffer_get_next_ready_instr(62,1663
-void decode_buffer_remove_instruction(79,2089
-unsigned int decode_buffer_free_spots_next_clock(95,2544
+void __edge_decode_buffer(46,1230
+instr* decode_buffer_get_next_ready_instr(63,1711
+void decode_buffer_remove_instruction(80,2137
+unsigned int decode_buffer_free_spots_next_clock(96,2592
 
 misc.c,23
 unsigned int min(3,19
@@ -206,10 +206,10 @@ free_list_entry* free_list 6,124
 busy_list_entry* busy_list 7,159
 void reg_map_init(9,195
 phys_reg reg_map_assign(18,339
-void add_to_free_list(32,702
-void add_to_busy_list(45,1053
-instr* reg_map_get_latest_instr_writing_to(60,1516
-void reg_map_free_by_logical(73,1926
+void add_to_free_list(31,651
+void add_to_busy_list(44,1002
+instr* reg_map_get_latest_instr_writing_to(59,1465
+void reg_map_free_by_logical(72,1875
 
 backend.c,382
 static unsigned int backend_cycle 3,22
