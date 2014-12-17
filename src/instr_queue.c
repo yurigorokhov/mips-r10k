@@ -178,14 +178,26 @@ void insert_instruction(instr* instruction, instr_queue_entry** queue) {
     *queue = entry;
   } else {
 
-    // if this is a branch, it gets priority so put it at the front
+    /*
+     * if this is a branch, it needs to go at the front
+     * but after the other branches in the queue
+     */
+    instr_queue_entry* current = *queue;
     if(BRANCH == instruction->op) {
-      entry->next = *queue;
-      *queue = entry;
+      if(BRANCH != current->instruction->op) {
+	entry->next = *queue;
+	*queue = entry;
+      } else {
+	while(current->next != NULL && 
+	      BRANCH == ((instr_queue_entry*)current->next)->instruction->op) {
+	  current = current->next;
+	}
+	entry->next = current->next;
+	current->next = entry;
+      }
     } else {
 
       // schedule at the end
-      instr_queue_entry* current = *queue;
       while(NULL != current->next) { current = current->next; }
       current->next = entry;
     }
@@ -243,7 +255,7 @@ void instr_queue_handle_mispredict_helper(unsigned int addr, instr_queue_entry**
   instr_queue_entry* current = *queue;
   instr_queue_entry* prev;
   while(NULL != current) {
-    if(current->instruction->addr > addr) {
+    if(current->instruction->addr >= addr) {
       if(*queue == current) {
 	*queue = current->next;
       } else {

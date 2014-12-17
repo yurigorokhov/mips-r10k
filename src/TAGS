@@ -1,11 +1,15 @@
 
-backend.h,179
+backend.h,288
 #define BACKEND_H2,18
 #define BACKEND_DISPATCH_PER_CYCLE 13,236
   instr* instruction;17,298
   unsigned int cycle_num;18,320
   void* next;19,346
 } instr_history_entry;20,360
+  instr_history_entry* entry;23,401
+  unsigned int step;24,431
+  void* next;25,452
+} history_step;26,466
 
 error.h,334
 #define ERROR_H2,16
@@ -80,12 +84,12 @@ instr* instr_queue_get_ready_fp_instr(100,2633
 instr* instr_queue_get_ready_int_instr(112,2962
 void __calc_instr_queue(135,3512
 void insert_instruction(169,4460
-void __edge_instr_queue(195,5153
-unsigned int instr_queue_free_int_spots_next_clock(228,6098
-unsigned int instr_queue_free_addr_spots_next_clock(232,6276
-unsigned int instr_queue_free_fp_spots_next_clock(236,6458
-void instr_queue_handle_mispredict_helper(241,6632
-void instr_queue_handle_mispredict(261,7126
+void __edge_instr_queue(207,5454
+unsigned int instr_queue_free_int_spots_next_clock(240,6399
+unsigned int instr_queue_free_addr_spots_next_clock(244,6577
+unsigned int instr_queue_free_fp_spots_next_clock(248,6759
+void instr_queue_handle_mispredict_helper(253,6933
+void instr_queue_handle_mispredict(273,7428
 
 fetch_stage.h,167
 #define FETCH_STAGE_H2,22
@@ -104,14 +108,15 @@ decode_buffer.h,209
   void* next;16,273
 } decode_buffer_entry;17,287
 
-fetch_stage.c,193
+fetch_stage.c,237
 static fetch_stage_entry* head 3,26
 unsigned int __calc_fetch_stage(5,66
 void __edge_fetch_stage_add_instr(12,277
 instr* fetch_get_ready_instr(27,714
 void fetch_stage_remove_instr(43,1046
+void fetch_stage_handle_mispredict(59,1450
 
-decode_buffer.c,484
+decode_buffer.c,531
 static decode_buffer_entry* decode_buffer_head 3,28
 static instr* __calc_scheduled_to_be_added[__calc_scheduled_to_be_added5,85
 static unsigned int __calc_scheduled_size 6,160
@@ -123,31 +128,35 @@ void __edge_decode_buffer(46,1230
 instr* decode_buffer_get_next_ready_instr(63,1711
 void decode_buffer_remove_instruction(80,2137
 unsigned int decode_buffer_free_spots_next_clock(96,2592
+void decode_buffer_handle_mispredict(129,3649
 
 misc.c,23
 unsigned int min(3,19
 
-frontend.c,272
+frontend.c,426
 static instr** instruction_buffer;3,23
 static unsigned int idx 4,58
 static unsigned int capacity 5,87
 void frontend_init(7,122
 void frontend_enqueue(12,245
 void frontend_clean(21,490
-error_code frontend_getinstr(29,629
-unsigned int frontend_get_instr_count(37,810
+error_code frontend_getinstr_with_step(29,629
+error_code frontend_getinstr(40,889
+unsigned int frontend_get_instr_count(48,1070
+unsigned int frontend_get_max_step(52,1129
+unsigned int frontend_augment_steps_starting_at_addr(63,1414
 
 mipsr10k.c,45
-int main(11,190
-void print_history(61,1437
+int main(12,197
+void print_history(62,1431
 
 instr.c,201
 error_code parse_instruction(9,213
-void skip_whitespace(68,1371
-error_code sm_parse_op(72,1445
-error_code sm_parse_next_hex(79,1623
-instr_operation parse_op(102,2077
-const char* get_str(127,2419
+void skip_whitespace(69,1398
+error_code sm_parse_op(73,1472
+error_code sm_parse_next_hex(80,1650
+instr_operation parse_op(103,2104
+const char* get_str(128,2446
 
 functional.h,194
 #define FUNCTIONAL_H2,21
@@ -163,7 +172,7 @@ misc.h,20
 frontend.h,24
 #define FRONTEND_H2,19
 
-instr.h,559
+instr.h,587
 #define INSTR_HEADER2,21
   NONE,13,192
   FETCH,14,200
@@ -189,8 +198,9 @@ typedef unsigned int reg;32,435
   reg rd;39,573
   unsigned int extra;40,598
   unsigned int addr;43,693
-  instr_stage stage;44,714
-} instr;45,735
+  unsigned int step;46,744
+  instr_stage stage;47,765
+} instr;48,786
 
 functional.c,625
 static instr* _next_instr_alu1 4,59
@@ -218,17 +228,17 @@ void add_to_busy_list(44,1002
 instr* reg_map_get_latest_instr_writing_to(59,1465
 void reg_map_free_by_logical(72,1875
 
-backend.c,382
+backend.c,380
 static unsigned int backend_cycle 3,22
 static unsigned int pc_addr 4,61
-static instr* instr_mispredicted 5,94
-static instr_history_entry** history;8,189
-void backend_init(12,260
-void backend_branch_mispredict(23,530
-error_code backend_cycle_step(27,622
-unsigned int record_history(71,1676
-instr_history_entry** get_history(113,2861
-unsigned int backend_get_cycle(117,2920
+static unsigned int backend_step 5,94
+static instr* instr_mispredicted 6,132
+static history_step* history;9,227
+void backend_branch_mispredict(13,290
+error_code backend_cycle_step(17,382
+unsigned int record_history(78,1974
+history_step* get_history(147,3905
+unsigned int backend_get_cycle(151,3956
 
 error.c,28
 const char* get_error(3,20

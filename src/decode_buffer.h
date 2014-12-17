@@ -22,4 +22,6 @@ void __edge_decode_buffer();
 instr* decode_buffer_get_next_ready_instr(unsigned int skip);
 void decode_buffer_remove_instruction(instr* instruction);
 
+void decode_buffer_handle_mispredict();
+
 #endif

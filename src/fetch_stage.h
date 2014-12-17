@@ -19,5 +19,6 @@ unsigned int __calc_fetch_stage();
 void __edge_fetch_stage_add_instr(instr*);
 instr* fetch_get_ready_instr(unsigned int);
 void fetch_stage_remove_instr(instr*);
+void fetch_stage_handle_mispredict();
 
 #endif

@@ -59,6 +59,7 @@ error_code parse_instruction(char* str, instr** res, unsigned int addr) {
   (*res)->rd = rd;
   (*res)->extra = extra;
   (*res)->addr = addr;
+  (*res)->step = UINT_MAX;
   (*res)->original_str = str;
   (*res)->stage = NONE;
   return SUCCESS;

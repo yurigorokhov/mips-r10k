@@ -125,3 +125,18 @@ unsigned int decode_buffer_free_spots_next_clock() {
 exitloop:
   return min(DECODE_BUFFER_SIZE,  DECODE_BUFFER_SIZE - get_size() + count);
 }
+
+void decode_buffer_handle_mispredict() {
+  
+  // All instructions here are newer than mispredict
+  // Nuke the whole buffer
+  if(NULL == decode_buffer_head) return;
+  decode_buffer_entry* current = decode_buffer_head;
+  decode_buffer_entry* prev;
+  decode_buffer_head = NULL;
+  while(NULL != current) {
+    prev = current;
+    current = current->next;
+    free(prev);
+  }
+}

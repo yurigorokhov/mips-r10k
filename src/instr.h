@@ -41,6 +41,9 @@ typedef struct {
   
   // the address (line number) from which this instruction was loaded
   unsigned int addr;
+  
+  // for book keeping only
+  unsigned int step;
   instr_stage stage;
 } instr;
 

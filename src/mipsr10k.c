@@ -5,8 +5,9 @@
 #include "error.h"
 #include "frontend.h"
 #include "backend.h"
+#include "reg_map.h"
 
-void print_history(unsigned int, unsigned int);
+void print_history(unsigned int);
 
 int main(int argc, char **argv) {
   if(argc != 2) {
@@ -47,19 +48,19 @@ int main(int argc, char **argv) {
     frontend_enqueue(parsed_instr);
     ++i;
   }
-  printf("\nLoaded %i instructions\n", i);
+  printf("\nLoaded %i instructions\n", i-1);
   fclose(input_file);
-  backend_init();
-  while(SUCCESS == (code = backend_cycle_step())) {
-    // cycle has happened
-  }
+
+  // run simulation
+  reg_map_init();
+  while(SUCCESS == (code = backend_cycle_step()));
   frontend_clean();
-  print_history(i-1, backend_get_cycle());
+  print_history(backend_get_cycle());
   return 0;
 }
 
-void print_history(unsigned int num_instr, unsigned int num_cycles) {
-  instr_history_entry** history = get_history();
+void print_history(unsigned int num_cycles) {
+  history_step* history_current = get_history();
 
   // write header
   unsigned int i,  j;
@@ -68,17 +69,17 @@ void print_history(unsigned int num_instr, unsigned int num_cycles) {
     printf("%2i|", i);
   }
   printf("\n");
-
+  
   // write instructions
   instr_stage prev_stage = NONE;
-  for(i = 0; i < num_instr; ++i) {
-    instr_history_entry* current = history[i];
+  while(NULL != history_current) {
+    instr_history_entry* current = history_current->entry;
 
     // print the address & instruction
-    printf("|0x%5.5x|%20s|", 
-	    current->instruction->addr, current->instruction->original_str);
+    printf("|0x%5.5x|%20s|",
+	   current->instruction->addr, current->instruction->original_str); /** TODO branch extra */
     for(j = 1; j <= num_cycles; j++) {
-      if(NULL == current) {
+      if(NULL == current || current->cycle_num != j) {
 	printf("%2s|", "");
 	continue;
       }
@@ -92,5 +93,6 @@ void print_history(unsigned int num_instr, unsigned int num_cycles) {
       current = current->next;
     }
     printf("\n");
+    history_current = history_current->next;
   }
 }

@@ -19,9 +19,14 @@ typedef struct {
   void* next;
 } instr_history_entry;
 
-void backend_init();
+typedef struct {
+  instr_history_entry* entry;
+  unsigned int step;
+  void* next;
+} history_step;
+
 error_code backend_cycle_step();
-instr_history_entry** get_history();
+history_step* get_history();
 unsigned int backend_get_cycle();
 void backend_branch_mispredict(instr*);
 

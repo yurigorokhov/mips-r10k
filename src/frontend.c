@@ -26,6 +26,17 @@ void frontend_clean() {
   free(instruction_buffer);
 }
 
+error_code frontend_getinstr_with_step(unsigned int step, instr** res) {
+  unsigned int i;
+  for(i = 0; i < idx; ++i) {
+    if(instruction_buffer[i]->step == step) {
+      *res = instruction_buffer[i];
+      return SUCCESS;
+    }
+  }
+  return IDX_OVERFLOW;
+}
+
 error_code frontend_getinstr(unsigned int addr, instr** res) {
   if(addr > idx || addr < 1) {
     return IDX_OVERFLOW;
@@ -36,4 +47,25 @@ error_code frontend_getinstr(unsigned int addr, instr** res) {
 
 unsigned int frontend_get_instr_count() {
   return idx;
+}
+
+unsigned int frontend_get_max_step() {
+  unsigned int i;
+  unsigned int max_step = 0;
+  for(i = 0; i < idx; i++) {
+    if(instruction_buffer[i]->step > max_step && instruction_buffer[i]->step != UINT_MAX) {
+      max_step = instruction_buffer[i]->step;
+    }
+  }
+  return max_step;
+}
+
+unsigned int frontend_augment_steps_starting_at_addr(unsigned int addr) {
+  unsigned int next_available = frontend_get_max_step() + 1;
+  unsigned int res = next_available;
+  unsigned int i = addr-1;
+  for(; i < idx; i++) {
+    instruction_buffer[i]->step = next_available++;
+  }
+  return next_available;
 }

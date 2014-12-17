@@ -55,3 +55,15 @@ void fetch_stage_remove_instr(instr* instruction) {
   }
   free(current);
 }
+
+void fetch_stage_handle_mispredict() {
+  if(NULL == head) return;
+  fetch_stage_entry* current = head;
+  fetch_stage_entry* prev;
+  head = NULL;
+  while(NULL != current) {
+    prev = current;
+    current = current->next;
+    free(prev);
+  }
+}

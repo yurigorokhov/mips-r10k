@@ -124,24 +124,24 @@ void active_list_handle_mispredict(instr* instruction) {
   if(NULL == head) return;
   active_list_entry* current = head;
   active_list_entry* prev;
-  while(NULL != current) {
-    if(current->instruction->addr > instruction->addr) {
-      if(current == head) {
-	head = current->next;
-      } else {
-	prev->next = current->next;
-      }
-      if(current->instruction->rd != UINT_MAX) {
-
-	// free registers for these instructions
-	reg_map_free_by_logical(current->instruction->rd);
-      }
-      free(current);
-      current = prev->next;
-    } else {
-      prev = current;
-      current = prev->next;
-    }
+  while(NULL != current 
+	&& instruction->addr != current->instruction->addr) {
+    prev = current;
+    current = current->next;
+  }
+  if(NULL == current) return;
+  if(current == head) {
+    head = NULL;
+  } else {
+    prev->next = NULL;
   }
   
+  // clean up all the others
+  do {
+    prev = current;
+    current = current->next;
+    if(prev->instruction->rd != UINT_MAX)
+      reg_map_free_by_logical(prev->instruction->rd);
+    free(prev);
+  } while(NULL != current->next);
 }
