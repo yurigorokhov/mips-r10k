@@ -6,6 +6,7 @@
 #include "frontend.h"
 #include "backend.h"
 #include "reg_map.h"
+#include "misc.h"
 
 void print_history(unsigned int);
 
@@ -30,8 +31,8 @@ int main(int argc, char **argv) {
     
     // remove new line
     unsigned int j = 0;
-    while(line_buffer[j] != '\n') { j++; }
-    line_buffer[j] = '\0';
+    while(j < 80 && line_buffer[j] != '\n') { j++; }
+    line_buffer[min(j, 79)] = '\0';
     
     char* strcpy = malloc(sizeof(char)*(j+1));
     memcpy(strcpy, line_buffer, j+1);

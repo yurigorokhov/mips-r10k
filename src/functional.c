@@ -1,116 +1,118 @@
 #include "functional.h"
 
-// instructions to be picked next
-static instr* _next_instr_alu1 = NULL;
-static instr* _next_instr_alu2 = NULL;
-static instr* _next_instr_addr = NULL;
-static instr* _next_instr_fp = NULL;
+functional_entry* head = NULL;
+functional_entry* next = NULL;
 
-// instructions currently executing
-static functional_entry* _curr_instr_alu1 = NULL;
-static functional_entry* _curr_instr_alu2 = NULL;
-static functional_entry* _curr_instr_addr = NULL;
-static functional_entry* _curr_instr_fp = NULL;
-
-// used during calc to record how many instructions will be added next cycle
-static unsigned int free_int_spots = 0;
-static unsigned int free_fp_spots = 0;
+void queue_in_next(instr* instruction, unsigned int cycles) {
+  if(NULL == instruction) return;
+  functional_entry* current = next;
+  functional_entry* entry = malloc(sizeof(functional_entry));
+  entry->next = NULL;
+  entry->instruction = instruction;
+  entry->cycles_left = cycles;
+  if(NULL == next) {
+    next = entry;
+  } else {
+    while(NULL != current->next) {
+      current = current->next;
+    }
+    current->next = entry;
+  }
+}
 
 void __calc_functional_units() {
-  
-  // pick items that will be executed from instruction queues if we have room
-  if(NULL == _curr_instr_alu1 || 1 == _curr_instr_alu1->cycles_left) {
-    _next_instr_alu1 = instr_queue_get_ready_int_instr(0, true); free_int_spots++;
+  instr* next_alu1 = instr_queue_get_ready_int_instr(0, true);
+  queue_in_next(next_alu1, FUNCTIONAL_INTEGER_CYCLES);
+  instr* next_alu2 = instr_queue_get_ready_int_instr(1, false);
+  queue_in_next(next_alu2, FUNCTIONAL_INTEGER_CYCLES);
+  instr* next_fp_add = instr_queue_get_ready_fp_instr(true);
+  queue_in_next(next_fp_add, FUNCTIONAL_FP_CYCLES);
+  instr* next_fp_mul = instr_queue_get_ready_fp_instr(false);
+  queue_in_next(next_fp_mul, FUNCTIONAL_FP_CYCLES);
+  instr* next_load_store = instr_queue_get_ready_addr_instr();
+  queue_in_next(next_load_store, FUNCTIONAL_LOAD_STORE_CYCLES);
+}
+
+void remove_head(instr* instruction) {
+  functional_entry* current = head;
+  functional_entry* prev;
+  while(current != NULL && current->instruction->addr != instruction->addr) {
+    prev = current;
+    current = current->next;
   }
-  if(NULL == _curr_instr_alu2 || 1 == _curr_instr_alu2->cycles_left) {
-    _next_instr_alu2 = instr_queue_get_ready_int_instr(1, false); free_int_spots++;
+  if(current == NULL) return;
+  if(current == head) {
+    head = current->next;
+  } else {
+    prev->next = current->next;
   }
-  if(NULL == _curr_instr_fp || 1 == _curr_instr_fp->cycles_left) {
-    _next_instr_fp = instr_queue_get_ready_fp_instr(); free_fp_spots++;
+  free(current);
+}
+
+void queue(functional_entry* entry) {
+  functional_entry* current = head;
+  entry->next = NULL;
+  if(current == NULL) {
+    head = entry;
+  } else {
+    while(current->next != NULL) { current = current->next; }
+    current->next = entry;
   }
-  
-  // we can always queue up the next load store
-  _next_instr_addr = instr_queue_get_ready_addr_instr();
 }
 
 void __edge_functional_units() { 
+  functional_entry* current;
+  functional_entry* prev;
 
-  // remove items from instruction queues and execute them!
-  if((NULL == _curr_instr_alu1 || _curr_instr_alu1->cycles_left == 1) 
-     && NULL != _next_instr_alu1) {
-    instr_queue_remove(_next_instr_alu1);
-    _curr_instr_alu1 = malloc(sizeof(functional_entry));
-    _curr_instr_alu1->instruction = _next_instr_alu1;
-    _curr_instr_alu1->instruction->stage = EXECUTE;
-    _curr_instr_alu1->cycles_left = FUNCTIONAL_INTEGER_CYCLES;
-  } else if(NULL != _curr_instr_alu1 && _curr_instr_alu1->cycles_left > 1) {
-    _curr_instr_alu1->cycles_left--;
+  // decrease everyone cycles left, and make sure they are in proper stage
+  current = head;
+  while(current != NULL) {
+    current->cycles_left--;
+    prev = current;
+    current = current->next;
   }
-  if((NULL == _curr_instr_alu2 || _curr_instr_alu2->cycles_left == 1) 
-     && NULL != _next_instr_alu2) {
-    instr_queue_remove(_next_instr_alu2);
-    _curr_instr_alu2 = malloc(sizeof(functional_entry));
-    _curr_instr_alu2->instruction = _next_instr_alu2;
-    _curr_instr_alu2->instruction->stage = EXECUTE;
-    _curr_instr_alu2->cycles_left = FUNCTIONAL_INTEGER_CYCLES;
-  } else if(NULL != _curr_instr_alu2 && _curr_instr_alu2->cycles_left > 1) {
-    _curr_instr_alu2->cycles_left--;
+
+  // add next instructions
+  current = next;
+  while(NULL != current) {
+    prev = current->next;
+    queue(current);
+    current->instruction->stage = EXECUTE;
+
+    // if this is not a load or store, remove from queue
+    if(current->instruction->op != LOAD && current->instruction->op != STORE) {
+      instr_queue_remove(current->instruction);
+    }
+    current = prev;
+  }
+
+  // check those that will be ready on the next clock
+  current = head;
+  while(current != NULL) {
+
+    // set instructions that will be ready on the next clock
+    if(current->cycles_left == 1) {
+      
+      // if this is a branch, check if it mispredicted
+      if(BRANCH == current->instruction->op && 1 == current->instruction->extra) {
+	backend_branch_mispredict(current->instruction);
+      }
+      active_list_set_instr_ready(current->instruction);
+    }
+    current = current->next;
   }
   
-  // fp
-  if((NULL == _curr_instr_fp || _curr_instr_fp->cycles_left == 1)
-     && NULL != _next_instr_fp) {
-    instr_queue_remove(_next_instr_fp);
-    _curr_instr_fp = malloc(sizeof(functional_entry));
-    _curr_instr_fp->instruction = _next_instr_fp;
-    _curr_instr_fp->instruction->stage = EXECUTE;
-    _curr_instr_fp->cycles_left = FUNCTIONAL_FP_CYCLES;
-  } else if(NULL != _curr_instr_fp && _curr_instr_fp->cycles_left > 1) {
-    _curr_instr_fp->cycles_left--;
-  }
-
-  // always execute load/store
-  if(NULL != _next_instr_addr) {
-    _curr_instr_addr = malloc(sizeof(functional_entry));
-    _curr_instr_addr->instruction = _next_instr_addr;
-    _curr_instr_addr->instruction->stage = EXECUTE;
-    _curr_instr_addr->cycles_left = 1;
-    active_list_set_instr_ready(_curr_instr_addr->instruction);
-  }
-
-  // set instructions that will be ready next clock cycle
-  if(NULL != _curr_instr_alu1 && 1 == _curr_instr_alu1->cycles_left) {
-    active_list_set_instr_ready(_curr_instr_alu1->instruction);
-
-    // check if a branch mispredicted
-    if(BRANCH == _curr_instr_alu1->instruction->op &&  1 == _curr_instr_alu1->instruction->extra) {
-      
-      // this branch mispredicted, the next cycle will be a mispredict bubble
-      backend_branch_mispredict(_curr_instr_alu1->instruction);
+  // check instructions that are completely done
+  current = head;
+  while(current != NULL) {
+    if(current->cycles_left == 0) {
+      remove_head(current->instruction);
     }
-  }
-  if(NULL != _curr_instr_alu2 && 1 == _curr_instr_alu2->cycles_left) {
-    active_list_set_instr_ready(_curr_instr_alu2->instruction);
+    current = current->next;
   }
 
-  if(NULL != _curr_instr_fp && 1 == _curr_instr_fp->cycles_left) {
-    active_list_set_instr_ready(_curr_instr_fp->instruction);
-  }
-
-  // reset next
-  _next_instr_alu1 = NULL;
-  _next_instr_alu2 = NULL;
-  _next_instr_addr = NULL;
-  _next_instr_fp = NULL;
-  free_int_spots = 0;
-  free_fp_spots = 0;
+  // clear next
+  next = NULL;
 }
 
-unsigned int functional_free_int_spots_next_clock() {
-  return free_int_spots;
-}
-
-unsigned int functional_free_fp_spots_next_clock() {
-  return free_fp_spots;
-}
 
