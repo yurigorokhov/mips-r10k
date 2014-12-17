@@ -153,13 +153,15 @@ mipsr10k.c,45
 int main(13,215
 void print_history(63,1468
 
-instr.c,201
+instr.c,263
 error_code parse_instruction(9,213
 void skip_whitespace(69,1398
 error_code sm_parse_op(73,1472
 error_code sm_parse_next_hex(80,1650
 instr_operation parse_op(103,2104
-const char* get_str(128,2446
+const char* op_from_instr(128,2446
+char* instr_str(145,2713
+const char* get_str(155,3106
 
 functional.h,260
 #define FUNCTIONAL_H2,21

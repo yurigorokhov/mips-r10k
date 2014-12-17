@@ -60,7 +60,6 @@ error_code parse_instruction(char* str, instr** res, unsigned int addr) {
   (*res)->extra = extra;
   (*res)->addr = addr;
   (*res)->step = UINT_MAX;
-  (*res)->original_str = str;
   (*res)->stage = NONE;
   return SUCCESS;
 }
@@ -123,6 +122,33 @@ instr_operation parse_op(char c) {
   default: 
     return UNKNOWN;
   }
+}
+
+const char* op_from_instr(instr* instruction) {
+  switch(instruction->op) {
+  case BRANCH:
+      return "B";
+  case LOAD:
+    return "L";
+  case STORE:
+    return "S";
+  case INTEGER:
+    return "I";
+  case FPMUL:
+    return "M";
+  case FPADD:
+    return "A";
+  }
+}
+
+char* instr_str(instr* instruction, char** str) {
+  *str = malloc(sizeof(char)*20);
+  sprintf(*str, "%s %.2x %.2x %.2x %.8x", 
+	  op_from_instr(instruction), 
+	  (instruction->rs == UINT_MAX) ? 0 : instruction->rs,
+	  (instruction->rt == UINT_MAX) ? 0 : instruction->rt,
+	  (instruction->rd == UINT_MAX) ? 0 : instruction->rd,
+	  (instruction->extra == UINT_MAX) ? 0 : instruction->extra);
 }
 
 const char* get_str(instr_stage stage, instr_operation op) {

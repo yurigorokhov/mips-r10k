@@ -32,7 +32,6 @@ typedef enum {
 typedef unsigned int reg;
 
 typedef struct {
-  const char* original_str;
   instr_operation op;
   reg rs; // source 1
   reg rt; // source 2
@@ -51,5 +50,6 @@ typedef struct {
 //--- Functions ---
 error_code parse_instruction(char* str, instr** outInstr, unsigned int);
 const char* get_str(instr_stage stage, instr_operation);
+char* instr_str(instr* instruction, char** str);
 
 #endif

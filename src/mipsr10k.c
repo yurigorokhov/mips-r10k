@@ -77,8 +77,11 @@ void print_history(unsigned int num_cycles) {
     instr_history_entry* current = history_current->entry;
 
     // print the address & instruction
+    char* _str;
+    instr_str(current->instruction, &_str);
     printf("|0x%5.5x|%20s|",
-	   current->instruction->addr, current->instruction->original_str); /** TODO branch extra */
+	   current->instruction->addr, _str); /** TODO branch extra */
+    free(_str);
     for(j = 1; j <= num_cycles; j++) {
       if(NULL == current || current->cycle_num != j) {
 	printf("%2s|", "");
