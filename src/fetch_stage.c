@@ -25,7 +25,7 @@ void __edge_fetch_stage_add_instr(instr* instruction) {
 }
 
 instr* fetch_get_ready_instr(unsigned int skip) {
-  if(NULL == head) return NULL;
+  if(NULL == head) { return NULL; }
   fetch_stage_entry* current = head;
   unsigned int i = 0;
   while(NULL != current) {

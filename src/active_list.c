@@ -44,6 +44,7 @@ error_code active_list_add(instr* instruction) {
   entry->instruction = instruction;
   entry->next = NULL;
   entry->is_ready_on_next_clock = 0;
+  entry->is_res_ready_on_next_clock = false;
   entry->physical = physical;
   active_list_entry* newest = get_newest_entry();
   if(NULL == newest) {
@@ -54,13 +55,24 @@ error_code active_list_add(instr* instruction) {
   return SUCCESS;
 }
 
+void active_list_set_instr_res_ready(instr* instruction) {
+  if(NULL == head) return;
+  active_list_entry* current = head;
+  while(NULL != current) {
+    if(current->instruction->addr == instruction->addr) {
+      current->is_res_ready_on_next_clock = true;
+      return;
+    }
+    current = current->next;
+  }
+}
+
 void active_list_set_instr_ready(instr* instruction) {
   if(NULL == head) return;
   active_list_entry* current = head;
   while(NULL != current) {
     if(current->instruction->addr == instruction->addr) {
       current->is_ready_on_next_clock = 1;
-      if(instruction->op == STORE)
       return;
     }
     current = current->next;
@@ -72,7 +84,7 @@ bool active_list_is_instr_ready(instr* instruction) {
   active_list_entry* current = head;
   while(NULL != current) {
     if(current->instruction->addr == instruction->addr) {
-      return (1 == current->is_ready_on_next_clock) ? true : false;
+      return current->is_res_ready_on_next_clock;
     }
     current = current->next;
   }

@@ -66,7 +66,7 @@ void print_history(unsigned int num_cycles) {
   // write header
   unsigned int i,  j;
   printf("|%7s|%20s|", "addr", "instruction");
-  for(i = 1; i <= num_cycles; ++i) {
+  for(i = 0; i < num_cycles; ++i) {
     printf("%2i|", i);
   }
   printf("\n");
@@ -80,7 +80,7 @@ void print_history(unsigned int num_cycles) {
     char* _str;
     instr_str(current->instruction, &_str);
     printf("|0x%5.5x|%20s|",
-	   current->instruction->addr, _str); /** TODO branch extra */
+	   current->instruction->addr, _str);
     free(_str);
     for(j = 1; j <= num_cycles; j++) {
       if(NULL == current || current->cycle_num != j) {

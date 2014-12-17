@@ -10,10 +10,6 @@ static instr_queue_entry* addr_queue_head = NULL;
 
 // floating point queue
 static instr_queue_entry* fp_queue_head = NULL;
-static unsigned int free_int_spots;
-static unsigned int free_fp_spots;
-static unsigned int free_addr_spots;
-
 
 static instr* _queue_lookahead[BACKEND_DISPATCH_PER_CYCLE] = { NULL };
 static size_t _queue_lookahead_size = 0;
@@ -141,51 +137,32 @@ void __calc_instr_queue() {
   // get possible instructions that will fill the queue from decode buffer
   instr* next_instr;
   unsigned int i = 0;
-  bool alu1 = true;
-  bool alu2 = true;
-  bool fpadd = true;
-  bool fpmul = true;
-  bool loadstore = true;
+  unsigned int q_int = instr_queue_free_int_spots_next_clock();
+  unsigned int q_addr = instr_queue_free_addr_spots_next_clock();
+  unsigned int q_fp = instr_queue_free_fp_spots_next_clock();
   while(i < BACKEND_DISPATCH_PER_CYCLE
 	&& NULL != (next_instr = decode_buffer_get_next_ready_instr(i))) {
     switch(next_instr->op) {
     case INTEGER:
-      if(alu2) {
-	alu2 = false;
-      } else if(alu1) {
-	alu1 = false;
-      } else goto exitloop;
-      break;
     case BRANCH:
-      if(!alu1) goto exitloop;
-      alu1 = false;
+      if(q_int == 0) goto exitloop;
+      q_int--;
       break;
     case LOAD:
     case STORE:
-      if(!loadstore) goto exitloop;
-      loadstore = false;
+      if(q_addr == 0) goto exitloop;
+      q_addr--;
       break;
     case FPADD:
-      if(!fpadd) goto exitloop;
-      fpadd = false;
-      break;
     case FPMUL:
-      if(!fpmul) goto exitloop;
-      fpmul = false;
+      if(q_fp == 0) goto exitloop;
+      q_fp--;
       break;
     }
     _queue_lookahead[_queue_lookahead_size++] = next_instr;
     ++i;
   }
 exitloop:
-  free_int_spots = 0;
-  free_fp_spots = 0;
-  free_addr_spots = 0;
-  if(!alu1) free_int_spots++;
-  if(!alu2) free_int_spots++;
-  if(!fpadd) free_fp_spots++;
-  if(!fpmul) free_fp_spots++;
-  if(!loadstore) free_addr_spots++;
   return;
 }
 
@@ -261,15 +238,15 @@ void __edge_instr_queue() {
 }
 
 unsigned int instr_queue_free_int_spots_next_clock() {
-  return min(INT_QUEUE_SIZE - min(0, get_queue_size(int_queue_head) + free_int_spots), INT_QUEUE_SIZE);
+  return min(INT_QUEUE_SIZE - min(0, get_queue_size(int_queue_head) + f_taking_int()), INT_QUEUE_SIZE);
 }
 
 unsigned int instr_queue_free_addr_spots_next_clock() {
-  return min(ADDR_QUEUE_SIZE - min(0, get_queue_size(addr_queue_head) + free_addr_spots), ADDR_QUEUE_SIZE);
+  return min(ADDR_QUEUE_SIZE - min(0, get_queue_size(addr_queue_head) + f_taking_addr()), ADDR_QUEUE_SIZE);
 }
 
 unsigned int instr_queue_free_fp_spots_next_clock() {
-  return min(FP_QUEUE_SIZE - min(0, get_queue_size(fp_queue_head) + free_fp_spots), FP_QUEUE_SIZE);
+  return min(FP_QUEUE_SIZE - min(0, get_queue_size(fp_queue_head) + f_taking_fp()), FP_QUEUE_SIZE);
 }
 
 

@@ -6,7 +6,7 @@
 #include "instr.h"
 
 #define FUNCTIONAL_INTEGER_CYCLES 1
-#define FUNCTIONAL_FP_CYCLES 2
+#define FUNCTIONAL_FP_CYCLES 3
 #define FUNCTIONAL_LOAD_STORE_CYCLES 1
 
 typedef struct {
@@ -17,5 +17,9 @@ typedef struct {
 
 void __calc_functional_units();
 void __edge_functional_units();
+
+unsigned int f_taking_int();
+unsigned int f_taking_fp();
+unsigned int f_taking_addr();
 
 #endif
