@@ -1,0 +1,14 @@
+====== Compilation ======
+
+./configure
+make
+
+====== Running Tests  ======
+
+Included tests are in ./src/tests
+
+Running the tool:
+
+./src/mipsr10k ./src/test/b4
+
+
