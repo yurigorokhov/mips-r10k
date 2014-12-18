@@ -49,7 +49,6 @@ int main(int argc, char **argv) {
     frontend_enqueue(parsed_instr);
     ++i;
   }
-  printf("\nLoaded %i instructions\n", i-1);
   fclose(input_file);
 
   // run simulation

@@ -25,6 +25,8 @@
 #endif
 
 /*---- Cycle times ----*/
+/*---- (These are not meant to be changed, behavior unpredictable) ----*/
+
 #ifndef FETCH_CYCLES
 #define FETCH_CYCLES 1
 #endif

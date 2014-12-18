@@ -13,8 +13,9 @@ void __edge_fetch_stage_add_instr(instr* instruction) {
 
   fetch_stage_entry* curr = head;
   while(NULL != curr) {
-    if(curr->cycles_left > 0)
+    if(curr->cycles_left > 0) {
       curr->cycles_left--;
+    }
     curr = curr->next;
   }
 
