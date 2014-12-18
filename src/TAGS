@@ -31,20 +31,19 @@ static instr* __instructions_to_commit[__instructions_to_commit3,24
 static unsigned int __instructions_to_commit_size 4,92
 static instr* load_store_mem_cycle 5,147
 void __calc_committer(7,191
-void __edge_committer(25,774
-unsigned int how_many_will_commit_next_clock(57,1685
-unsigned int how_many_addr_will_commit_next_clock(61,1777
+void __edge_committer(26,812
+unsigned int how_many_will_commit_next_clock(57,1729
+unsigned int how_many_addr_will_commit_next_clock(61,1821
 
-active_list.h,280
+active_list.h,247
 #define ACTIVE_LIST_H2,22
-#define ACTIVE_LIST_SIZE 12,193
-  instr* instruction;15,239
-  char is_ready_on_next_clock;16,261
-  bool is_res_ready_on_next_clock;17,292
-  bool has_done_mem_cycle;18,327
-  phys_reg physical;19,354
-  void* next;20,375
-} active_list_entry;21,389
+  instr* instruction;14,233
+  char is_ready_on_next_clock;15,255
+  bool is_res_ready_on_next_clock;16,286
+  bool has_done_mem_cycle;17,321
+  phys_reg physical;18,348
+  void* next;19,369
+} active_list_entry;20,383
 
 instr_queue.h,140
 #define INSTR_QUEUE_H2,22
@@ -71,11 +70,11 @@ void active_list_set_instr_res_ready(58,1305
 void active_list_set_instr_ready(70,1619
 bool active_list_is_instr_ready(86,2096
 instr* active_list_get_instr_ready(98,2413
-void active_list_commit_instruction(118,2910
-unsigned int active_list_how_many_spots_next_clock(126,3081
-void active_list_handle_mispredict(130,3234
-unsigned int num_active_branches(159,3931
-void active_list_set_mem_cycle(171,4182
+void active_list_commit_instruction(119,2941
+unsigned int active_list_how_many_spots_next_clock(127,3112
+void active_list_handle_mispredict(131,3265
+unsigned int num_active_branches(163,4035
+void active_list_set_mem_cycle(175,4286
 
 instr_queue.c,922
 static instr_queue_entry* int_queue_head 6,97
@@ -87,17 +86,17 @@ size_t get_queue_size(18,421
 instr_queue_entry** get_queue_by_type(29,640
 void instr_queue_remove(47,1015
 bool will_instr_inputs_be_ready(65,1509
-instr* instr_queue_get_ready_addr_instr(82,2127
-instr* instr_queue_get_ready_fp_instr(110,2896
-instr* instr_queue_get_ready_int_instr(124,3356
-void __calc_instr_queue(147,3906
-void insert_instruction(181,4773
-void __edge_instr_queue(219,5767
-unsigned int instr_queue_free_int_spots_next_clock(252,6655
-unsigned int instr_queue_free_addr_spots_next_clock(256,6817
-unsigned int instr_queue_free_fp_spots_next_clock(260,6984
-void instr_queue_handle_mispredict_helper(265,7142
-void instr_queue_handle_mispredict(285,7637
+instr* instr_queue_get_ready_addr_instr(84,2166
+instr* instr_queue_get_ready_fp_instr(112,2976
+instr* instr_queue_get_ready_int_instr(126,3436
+void __calc_instr_queue(149,3986
+void insert_instruction(183,4853
+void __edge_instr_queue(221,5847
+unsigned int instr_queue_free_int_spots_next_clock(254,6735
+unsigned int instr_queue_free_addr_spots_next_clock(258,6897
+unsigned int instr_queue_free_fp_spots_next_clock(262,7064
+void instr_queue_handle_mispredict_helper(267,7222
+void instr_queue_handle_mispredict(287,7717
 
 fetch_stage.h,139
 #define FETCH_STAGE_H2,22
@@ -109,9 +108,9 @@ fetch_stage.h,139
 branch_stack.c,142
 static bs_entry* head 3,27
 void bs_add(5,58
-void bs_remove(20,438
-void bs_set_instr_ready(37,822
-unsigned int bs_size_next_clock(47,1117
+void bs_remove(28,569
+void bs_set_instr_ready(45,953
+unsigned int bs_size_next_clock(55,1248
 
 decode_buffer.h,144
 #define DECODE_BUFFER_H2,24
@@ -151,12 +150,12 @@ static unsigned int idx 4,58
 static unsigned int capacity 5,87
 void frontend_init(7,122
 void frontend_enqueue(12,245
-void frontend_clean(21,490
-error_code frontend_getinstr_with_step(29,629
-error_code frontend_getinstr(40,889
-unsigned int frontend_get_instr_count(48,1070
-unsigned int frontend_get_max_step(52,1129
-unsigned int frontend_augment_steps_starting_at_addr(63,1414
+void frontend_clean(21,486
+error_code frontend_getinstr_with_step(29,625
+error_code frontend_getinstr(40,885
+unsigned int frontend_get_instr_count(48,1066
+unsigned int frontend_get_max_step(52,1125
+unsigned int frontend_augment_steps_starting_at_addr(63,1410
 
 mipsr10k.c,68
 int main(14,239
@@ -165,13 +164,13 @@ void print_history(73,1557
 
 instr.c,263
 error_code parse_instruction(9,213
-void skip_whitespace(68,1368
-error_code sm_parse_op(72,1442
-error_code sm_parse_next_hex(79,1620
-instr_operation parse_op(102,2074
-const char* op_from_instr(127,2416
-char* instr_str(144,2683
-const char* get_str(154,3076
+void skip_whitespace(75,1501
+error_code sm_parse_op(79,1575
+error_code sm_parse_next_hex(86,1753
+instr_operation parse_op(109,2207
+const char* op_from_instr(134,2549
+char* instr_str(151,2816
+const char* get_str(161,3209
 
 functional.h,138
 #define FUNCTIONAL_H2,21
@@ -231,15 +230,16 @@ unsigned int f_taking_int(139,3950
 unsigned int f_taking_fp(144,4005
 unsigned int f_taking_addr(149,4058
 
-reg_map.c,277
+reg_map.c,307
 free_list_entry* free_list 6,124
 busy_list_entry* busy_list 7,159
 void reg_map_init(13,262
-phys_reg reg_map_assign(22,406
-void add_to_free_list(36,755
-void add_to_busy_list(50,1133
-instr* reg_map_get_latest_instr_writing_to(68,1633
-void reg_map_free_by_logical(81,2043
+logi_reg get_dest_reg(22,406
+phys_reg reg_map_assign(30,612
+void add_to_free_list(45,981
+void add_to_busy_list(59,1359
+instr* reg_map_get_latest_instr_writing_to(77,1859
+void reg_map_free_by_logical(90,2269
 
 backend.c,380
 static unsigned int backend_cycle 3,22
@@ -249,38 +249,39 @@ static instr* instr_mispredicted 6,132
 static history_step* history;9,227
 void backend_branch_mispredict(13,290
 error_code backend_cycle_step(17,382
-unsigned int record_history(82,2030
-history_step* get_history(151,3961
-unsigned int backend_get_cycle(155,4012
+unsigned int record_history(82,2034
+history_step* get_history(151,3965
+unsigned int backend_get_cycle(155,4016
 
 error.c,28
 const char* get_error(3,20
 
-reg_map.h,361
+reg_map.h,311
 #define REGMAP_H2,17
-#define PHYS_REGS 8,96
-#define LOGI_REGS 9,117
-typedef unsigned int phys_reg;11,139
-typedef unsigned int logi_reg;12,170
-  phys_reg physical;15,219
-  void* next;16,240
-} free_list_entry;17,254
-  phys_reg physical;20,291
-  logi_reg logical;21,312
-  instr* instruction_writing;22,332
-  void* next;23,362
-} busy_list_entry;24,376
+typedef unsigned int phys_reg;9,119
+typedef unsigned int logi_reg;10,150
+  phys_reg physical;13,199
+  void* next;14,220
+} free_list_entry;15,234
+  phys_reg physical;18,271
+  logi_reg logical;19,292
+  instr* instruction_writing;20,312
+  void* next;21,342
+} busy_list_entry;22,356
 
-constants.h,416
+constants.h,506
 #define BACKEND_DISPATCH_PER_CYCLE 7,179
-#define DECODE_BUFFER_SIZE 12,278
-#define INT_QUEUE_SIZE 16,338
-#define ADDR_QUEUE_SIZE 20,396
-#define FP_QUEUE_SIZE 24,453
-#define BRANCH_STACK_SIZE 28,512
-#define FETCH_CYCLES 35,670
-#define DECODE_CYCLES 39,723
-#define ISSUE_CYCLES 43,776
-#define FUNCTIONAL_INTEGER_CYCLES 47,841
-#define FUNCTIONAL_FP_CYCLES 51,914
-#define FUNCTIONAL_LOAD_STORE_CYCLES 55,990
+#define PHYS_REGS 14,378
+#define LOGI_REGS 18,425
+#define ACTIVE_LIST_SIZE 23,506
+#define DECODE_BUFFER_SIZE 27,569
+#define INT_QUEUE_SIZE 31,629
+#define ADDR_QUEUE_SIZE 35,687
+#define FP_QUEUE_SIZE 39,744
+#define BRANCH_STACK_SIZE 43,803
+#define FETCH_CYCLES 50,961
+#define DECODE_CYCLES 54,1014
+#define ISSUE_CYCLES 58,1067
+#define FUNCTIONAL_INTEGER_CYCLES 62,1132
+#define FUNCTIONAL_FP_CYCLES 66,1205
+#define FUNCTIONAL_LOAD_STORE_CYCLES 70,1281

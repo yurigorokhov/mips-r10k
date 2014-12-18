@@ -240,6 +240,7 @@ top_srcdir = ..
 AM_CXXFLAGS = $(INTI_CFLAGS)
 mipsr10k_SOURCES = mipsr10k.c instr.c instr.h error.c error.h frontend.c frontend.h backend.c backend.h reg_map.c reg_map.h instr_queue.c instr_queue.h active_list.c active_list.h decode_buffer.h decode_buffer.c functional.h functional.c committer.h committer.c misc.h misc.c fetch_stage.h fetch_stage.c constants.h branch_stack.h branch_stack.c
 mipsr10k_LDADD = $(INTI_LIBS)
+TEST_FILE = test/s1
 all: all-am
 
 .SUFFIXES:
@@ -440,7 +441,7 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(PROGRAMS)
+all-am: Makefile $(PROGRAMS) all-local
 installdirs:
 	for dir in "$(DESTDIR)$(bindir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
@@ -546,7 +547,7 @@ uninstall-am: uninstall-binPROGRAMS
 
 .MAKE: install-am install-strip
 
-.PHONY: CTAGS GTAGS TAGS all all-am check check-am clean \
+.PHONY: CTAGS GTAGS TAGS all all-am all-local check check-am clean \
 	clean-binPROGRAMS clean-generic cscopelist-am ctags ctags-am \
 	distclean distclean-compile distclean-generic distclean-tags \
 	distdir dvi dvi-am html html-am info info-am install \
@@ -560,6 +561,9 @@ uninstall-am: uninstall-binPROGRAMS
 	ps ps-am tags tags-am uninstall uninstall-am \
 	uninstall-binPROGRAMS
 
+
+all-local: mipsr10k$(EXEEXT)
+	./mipsr10k ../$(TEST_FILE)
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

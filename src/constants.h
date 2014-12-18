@@ -24,7 +24,7 @@
 #endif
 
 #ifndef DECODE_BUFFER_SIZE
-#define DECODE_BUFFER_SIZE 8
+#define DECODE_BUFFER_SIZE 16
 #endif
 
 #ifndef INT_QUEUE_SIZE

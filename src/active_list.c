@@ -147,15 +147,17 @@ void active_list_handle_mispredict(instr* instruction) {
   }
   
   // clean up all the others
+  if(current == NULL) return;
   do {
     prev = current;
     current = current->next;
     logi_reg reg = get_dest_reg(prev->instruction);
-    if(reg != UINT_MAX)
+    if(reg != UINT_MAX) {
       reg_map_free_by_logical(reg);
+    }
     bs_remove(prev->instruction);
     free(prev);
-  } while(NULL != current->next);
+  } while(NULL != current && NULL != current->next);
 }
 
 unsigned int num_active_branches() {

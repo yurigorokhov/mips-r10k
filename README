@@ -9,6 +9,62 @@ Included tests are in ./src/tests
 
 Running the tool:
 
-./src/mipsr10k ./src/test/b4
+./src/mipsr10k test/b4
 
+You can also run it right from make:
+make TEST_FILE=test/b4
+
+
+====== Details =====
+
+active_list.h
+This is the ROB and is designed as a linked list of instructions (in program order). The default capacity is 32 instructions. Items are added to this list during issue, and stay until they commit.
+
+committer.h
+This is the commit stage. on calc() it looks at the functional units and sees if there are any instructions that will finish in the next cycle. It records them, and sets their state to commit on edge(). In the case of a load or store it must also remove it from the address queue.
+
+functional.h
+This file keeps track of the currently executing instructions. The functional unit keeps track of how long each instruction should stay in this stage by decrementing a counter (during calc()) of how many clock cycles are left for that particular instruction. On calc() the functional units poll the instruction queues to see if there any instructions that are ready to be executed. This file allows spots for 2 ALU’s, 1 FPMUL, 1 FPADD, 1 ADDRESS. Branches are given priority to ALU 1 by always letting ALU1 poll first. The functional unit also handles branch mispredicts since we want to detect those as soon as possible. When a branch is executed and detected to be mispredicted, the backend is called to start fetching at a new location.
+
+instr_queue.h
+There are 3 queues in this file: address, integer and fp. All have a default capacity of 16. On calc() the queue’s poll the decode buffer to see if any instructions are ready to be passed down. The tricky part is that depending on the type of instruction, we need to check if there is room in the appropriate queue. Since we have to issue in order, as soon as 1 queue fills up we have to stop issuing.
+
+decode_buffer.h
+This is an 8 entry decode buffer. It polls for instructions from the fetch stage and passes them on to the instruction queues. It also checks to see that we do not fill up the active list before issuing. A full decode buffer will cause a stall in fetching as well.
+
+fetch_stage.h
+This is just a placeholder for instructions that are in fetch stage. This probably has no hardware counterpart in terms of a register, but is needed in software to properly keep track of the instruction state.
+
+
+instr.h
+The main memory model for an instruction.
+
+typedef struct {
+  instr_operation op;
+  reg rs; 
+  reg rt; 
+  reg rd; 
+  unsigned int extra;
+} instr;
+
+reg_map.h
+This file keeps a free list of registers and an assignment map of logical -> physical registers. Registers get assigned as the instruction gets issued, and freed up when an instruction is committed. In code the free list and busy list is implemented as a linked list. There are by default 32 logical and 64 physical registers defined.
+
+branch_stack.h
+A simple 4 entry linked list to keep track of active (non committed) branches. This is to ensure that we do not decode a 5th branch, while 4 unresolved ones remain.
+
+backend.h
+This is the main loop of the application. It counts the cycles and calls calc/edge on every piece of the machinery. It also keeps the program counter, and get’s called to when a branch is mispredicted. It also records history for later display after calling edge().
+
+Most of these stages above have a __calc_* and an __edge_ method. State is only updated on __edge_ calls, calc is only there to pre-compute what will happen on the next edge. The most fun file is constants.h as it allows you to tweak parameters. I have included below the parameters that can be adjusted:
+
+#define BACKEND_DISPATCH_PER_CYCLE 4
+#define PHYS_REGS 64
+#define LOGI_REGS 32
+#define ACTIVE_LIST_SIZE 32
+#define DECODE_BUFFER_SIZE 8
+#define INT_QUEUE_SIZE 16
+#define ADDR_QUEUE_SIZE 16
+#define FP_QUEUE_SIZE 16
+#define BRANCH_STACK_SIZE 4
 
