@@ -9,12 +9,7 @@
 #include "active_list.h"
 #include "misc.h"
 #include "committer.h"
-
-#define INT_QUEUE_SIZE 16
-#define ADDR_QUEUE_SIZE 16
-#define FP_QUEUE_SIZE 16
-
-#define ISSUE_CYCLES 1
+#include "constants.h"
 
 typedef struct {
   instr* instruction;

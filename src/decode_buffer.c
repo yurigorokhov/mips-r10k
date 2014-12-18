@@ -44,6 +44,15 @@ void __calc_decode_buffer() {
 }
 
 void __edge_decode_buffer() {
+
+  // decrease cycles left on current instructions
+  decode_buffer_entry* curr = decode_buffer_head;
+  while(curr != NULL) {
+    if(curr->cycles_left > 0)
+      curr->cycles_left--;
+    curr = curr->next;
+  }
+
   unsigned int i = 0;
   if(__calc_scheduled_size > 0) {
     while(i < __calc_scheduled_size && !is_full()) {
@@ -67,12 +76,13 @@ instr* decode_buffer_get_next_ready_instr(unsigned int skip) {
   while(NULL != current) {
     
     // instructions that have 1 cycle left will be ready to move on
-    if(1 == current->cycles_left) {
-      if(i == skip) {
-	return current->instruction;
-      }
-      ++i;
+    if(current->cycles_left > 1) {
+      return NULL;
     }
+    if(i == skip) {
+      return current->instruction;
+    }
+    ++i;
     current = current->next;
   }
 }

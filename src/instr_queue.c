@@ -208,7 +208,7 @@ void __edge_instr_queue() {
   if(_queue_lookahead_size > 0) {
     unsigned int i;
     for(i = 0; i < _queue_lookahead_size; ++i) {
-      
+
       // if the active instruction list is full, there is nothing we can do
       if(active_list_is_full()) {
 	break;
@@ -220,15 +220,12 @@ void __edge_instr_queue() {
       if(queue_size == get_queue_size(*queue)) {
 
 	// this queue is full, skip instruction (it stays in decode buffer)
-	continue;
+	break;
       }
       
       // insert into queue & delete from decode buffer
       insert_instruction(_queue_lookahead[i], queue);
       decode_buffer_remove_instruction(_queue_lookahead[i]);
-
-      // STAGE >> DECODE
-      //TODO? _queue_lookahead[i]->stage = DECODE;
 
       // add to active list
       active_list_add(_queue_lookahead[i]);

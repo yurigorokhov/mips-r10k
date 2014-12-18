@@ -39,7 +39,6 @@ error_code active_list_add(instr* instruction) {
   if(BRANCH != instruction->op && STORE != instruction->op) {
     physical = reg_map_assign(instruction);
   }
-
   active_list_entry* entry = malloc(sizeof(active_list_entry));
   entry->instruction = instruction;
   entry->next = NULL;
@@ -73,7 +72,7 @@ void active_list_set_instr_ready(instr* instruction) {
   while(NULL != current) {
     if(current->instruction->addr == instruction->addr) {
       current->is_ready_on_next_clock = 1;
-      return;
+      break;
     }
     current = current->next;
   }
@@ -92,14 +91,14 @@ bool active_list_is_instr_ready(instr* instruction) {
 }
 
 instr* active_list_get_instr_ready(unsigned int skip) {
-  if(NULL == head) { return NULL; }
+  if(NULL == head) return NULL;
   active_list_entry* current = head;
   unsigned int i = 0;
   while(NULL != current) {
     if(!current->is_ready_on_next_clock) {
       
       // no further instructions can commit
-      break;
+      return NULL;
     }
     if(skip == i) {
       return current->instruction;
@@ -110,20 +109,11 @@ instr* active_list_get_instr_ready(unsigned int skip) {
   return NULL;
 }
 
-void active_list_commit_instruction(instr* instruction) {
-  active_list_entry* current = head;
-  active_list_entry* prev = current;
-  while(NULL != current && current->instruction->addr != instruction->addr) {
-    prev = current;
-    current = current->next;
-  }
-  if(NULL == current) return;
-  if(current == head) {
-    head = current->next;
-  } else {
-    prev->next = current->next;
-  }
-  free(current);
+void active_list_commit_instruction() {
+  if(NULL == head) return;
+  active_list_entry* curr = head;
+  head = head->next;
+  free(curr);
 }
 
 unsigned int active_list_how_many_spots_next_clock() {
@@ -131,7 +121,7 @@ unsigned int active_list_how_many_spots_next_clock() {
 }
 
 void active_list_handle_mispredict(instr* instruction) {
-  
+
   // remove any newer instructions
   if(NULL == head) return;
   active_list_entry* current = head;

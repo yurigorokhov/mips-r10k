@@ -10,6 +10,14 @@ unsigned int __calc_fetch_stage() {
 }
 
 void __edge_fetch_stage_add_instr(instr* instruction) {
+
+  fetch_stage_entry* curr = head;
+  while(NULL != curr) {
+    if(curr->cycles_left > 0)
+      curr->cycles_left--;
+    curr = curr->next;
+  }
+
   fetch_stage_entry* entry = malloc(sizeof(fetch_stage_entry));
   entry->instruction = instruction;
   entry->instruction->stage = FETCH;
@@ -29,12 +37,13 @@ instr* fetch_get_ready_instr(unsigned int skip) {
   fetch_stage_entry* current = head;
   unsigned int i = 0;
   while(NULL != current) {
-    if(1 == current->cycles_left) {
-      if(skip == i) {
-	return current->instruction;
-      }
-      ++i;
+    if(current->cycles_left > 1) {
+      return NULL;
     }
+    if(skip == i) {
+      return current->instruction;
+    }
+    ++i;
     current = current->next;
   }
   return NULL;

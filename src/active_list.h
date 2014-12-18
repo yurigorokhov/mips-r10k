@@ -25,7 +25,7 @@ error_code active_list_add(instr* instruction);
 instr* active_list_get_instr_ready(unsigned int skip);
 void active_list_set_instr_ready(instr* instruction);
 void active_list_set_instr_res_ready(instr* instruction);
-void active_list_commit_instruction(instr*);
+void active_list_commit_instruction();
 unsigned int active_list_how_many_spots_next_clock();
 bool active_list_is_instr_ready(instr*);
 void active_list_handle_mispredict(instr*);

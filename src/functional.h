@@ -4,10 +4,7 @@
 #include "backend.h"
 #include "instr_queue.h"
 #include "instr.h"
-
-#define FUNCTIONAL_INTEGER_CYCLES 1
-#define FUNCTIONAL_FP_CYCLES 3
-#define FUNCTIONAL_LOAD_STORE_CYCLES 2
+#include "constants.h"
 
 typedef struct {
   instr* instruction;

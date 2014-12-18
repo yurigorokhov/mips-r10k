@@ -6,9 +6,7 @@
 #include "instr.h"
 #include "misc.h"
 #include "fetch_stage.h"
-
-#define DECODE_BUFFER_SIZE 8
-#define DECODE_CYCLES 1
+#include "constants.h"
 
 typedef struct {
   instr* instruction;

@@ -20,6 +20,7 @@ void reg_map_init() {
 }
 
 phys_reg reg_map_assign(instr* instruction) {
+  if(instruction->rd == 0) return 0;
   phys_reg physical = free_list->physical;
 
   // remove from free list

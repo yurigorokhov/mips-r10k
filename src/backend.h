@@ -8,10 +8,7 @@
 #include "active_list.h"
 #include "decode_buffer.h"
 #include "functional.h"
-
-#ifndef BACKEND_DISPATCH_PER_CYCLE
-#define BACKEND_DISPATCH_PER_CYCLE 4
-#endif
+#include "constants.h"
 
 typedef struct {
   instr* instruction;

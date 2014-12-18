@@ -3,8 +3,7 @@
 
 #include "instr.h"
 #include "backend.h"
-
-#define FETCH_CYCLES 1
+#include "constants.h"
 
 typedef struct {
   instr* instruction;

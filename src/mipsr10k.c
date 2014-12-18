@@ -35,11 +35,11 @@ int main(int argc, char **argv) {
     while(j < 80 && line_buffer[j] != '\n') { j++; }
     line_buffer[min(j, 79)] = '\0';
     
-    if(is_empty(&line_buffer)) continue;
+    if(is_empty(line_buffer)) continue;
 
     // parse instruction
     instr* parsed_instr;
-    code = parse_instruction(&line_buffer, &parsed_instr, i);
+    code = parse_instruction(line_buffer, &parsed_instr, i);
     if(SUCCESS != code) {
       printf("%s: %i (%s)", get_error(code), i, line_buffer);
       exit(1);
