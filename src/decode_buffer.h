@@ -7,6 +7,7 @@
 #include "misc.h"
 #include "fetch_stage.h"
 #include "constants.h"
+#include "branch_stack.h"
 
 typedef struct {
   instr* instruction;

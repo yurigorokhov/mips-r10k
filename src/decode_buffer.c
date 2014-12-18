@@ -38,6 +38,13 @@ void __calc_decode_buffer() {
   instr* instruction;
   while(__calc_scheduled_size < DECODE_BUFFER_SIZE 
 	&& NULL != (instruction = (instr*)fetch_get_ready_instr(__calc_scheduled_size))) {
+    if(instruction->op == BRANCH) {
+      if(bs_size_next_clock() >= BRANCH_STACK_SIZE) {
+	break;
+      } else {
+	bs_add(instruction);
+      }
+    }
     __calc_scheduled_to_be_added[__calc_scheduled_size] = instruction;
     __calc_scheduled_size++;
   }
@@ -113,7 +120,7 @@ unsigned int decode_buffer_free_spots_next_clock() {
   while(NULL != current && free_active_list > 0) {
     switch(current->instruction->op) {
     case INTEGER:
-    case BRANCH: //TODO: also check branch stack
+    case BRANCH:
       if(0 == free_int_spots) goto exitloop;
       free_int_spots--;
       break;

@@ -33,6 +33,10 @@ error_code parse_instruction(char* str, instr** res, unsigned int addr) {
   if(SUCCESS != code) {
     return code;
   }
+  if(op == STORE && op == BRANCH) {
+    rt = UINT_MAX;
+  }
+
 
   // parse rd
   reg rd;
@@ -40,6 +44,9 @@ error_code parse_instruction(char* str, instr** res, unsigned int addr) {
   if(SUCCESS != code) {
     
     // rd is optional for some instructions
+    rd = UINT_MAX;
+  }
+  if(op == LOAD && op == STORE && op == BRANCH) {
     rd = UINT_MAX;
   }
 

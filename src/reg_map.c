@@ -19,8 +19,17 @@ void reg_map_init() {
   }
 }
 
+logi_reg get_dest_reg(instr* instruction) {
+  if(instruction->op == LOAD) 
+    return instruction->rt;
+  if(instruction->op == STORE || instruction->op == BRANCH)
+    return 0;
+  return instruction->rd;
+}
+
 phys_reg reg_map_assign(instr* instruction) {
-  if(instruction->rd == 0) return 0;
+  logi_reg reg = get_dest_reg(instruction);
+  if(reg == 0) return 0;
   phys_reg physical = free_list->physical;
 
   // remove from free list
@@ -29,7 +38,7 @@ phys_reg reg_map_assign(instr* instruction) {
   free(old_head);
 
   // add to busy list
-  add_to_busy_list(physical, instruction->rd, instruction);
+  add_to_busy_list(physical, reg, instruction);
   return physical;
 }
 

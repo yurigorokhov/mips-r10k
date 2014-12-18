@@ -7,7 +7,22 @@
 #define BACKEND_DISPATCH_PER_CYCLE 4
 #endif
 
+/*--- Registers ----*/
+/* It is assumed there are 2x phys regs as logi regs  *
+ * and as many logi regs as the active list           */
+#ifndef PHYS_REGS
+#define PHYS_REGS 64
+#endif
+
+#ifndef LOGI_REGS
+#define LOGI_REGS 32
+#endif
+
 /*---- Buffer sizes ----*/
+#ifndef ACTIVE_LIST_SIZE
+#define ACTIVE_LIST_SIZE 32
+#endif
+
 #ifndef DECODE_BUFFER_SIZE
 #define DECODE_BUFFER_SIZE 8
 #endif
@@ -22,6 +37,10 @@
 
 #ifndef FP_QUEUE_SIZE
 #define FP_QUEUE_SIZE 16
+#endif
+
+#ifndef BRANCH_STACK_SIZE
+#define BRANCH_STACK_SIZE 4
 #endif
 
 /*---- Cycle times ----*/
@@ -48,6 +67,6 @@
 #endif
 
 #ifndef FUNCTIONAL_LOAD_STORE_CYCLES
-#define FUNCTIONAL_LOAD_STORE_CYCLES 2
+#define FUNCTIONAL_LOAD_STORE_CYCLES 1
 #endif
 

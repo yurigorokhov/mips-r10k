@@ -70,7 +70,9 @@ bool will_instr_inputs_be_ready(instr* instruction) {
       return false;
     }
   }
-  if(instruction->rt != UINT_MAX && instruction->rt != 0) {
+  if(instruction->rt != UINT_MAX 
+     && instruction->rt != 0 
+     && instruction->op != LOAD) {
     writing_instr = reg_map_get_latest_instr_writing_to(instruction->rt, instruction->addr);
     if(NULL != writing_instr && !active_list_is_instr_ready(writing_instr)) {
       return false;
@@ -82,17 +84,29 @@ bool will_instr_inputs_be_ready(instr* instruction) {
 instr* instr_queue_get_ready_addr_instr() {
   if(NULL == addr_queue_head) return NULL;
   instr_queue_entry* current = addr_queue_head;
+  instr_queue_entry* checker;
+  while(current != NULL) {
+    if(current->instruction->stage == ISSUE 
+       && will_instr_inputs_be_ready(current->instruction)
+       && current->cycles_left <= 1) {
 
-  // skip those that are not in issue stage
-  while(current != NULL && current->instruction->stage >= EXECUTE) { 
+      // check that it does not conflict with older instruction addresses
+      checker = addr_queue_head;
+      bool conflicts = false;
+      while(checker != NULL && checker != current) {
+	if(checker->instruction->extra == current->instruction->extra 
+	   && checker->instruction->stage < MEM) {
+	  conflicts = true;
+	}
+	checker = checker->next;
+      }
+      if(!conflicts) {
+	return current->instruction;
+      }
+    }
     current = current->next;
   }
-  if(NULL == current) return NULL;
-  // TODO: can we execute out of order?
-  // always process the next load/store in order
-  if(current->cycles_left > 1 
-     || !will_instr_inputs_be_ready(current->instruction)) return NULL;
-  return current->instruction;
+  return NULL;
 }
 
 instr* instr_queue_get_ready_fp_instr(bool isAdd) {
@@ -205,6 +219,9 @@ void insert_instruction(instr* instruction, instr_queue_entry** queue) {
 }
 
 void __edge_instr_queue() {
+
+  // TODO: decrement cycles left
+
   if(_queue_lookahead_size > 0) {
     unsigned int i;
     for(i = 0; i < _queue_lookahead_size; ++i) {
@@ -222,7 +239,7 @@ void __edge_instr_queue() {
 	// this queue is full, skip instruction (it stays in decode buffer)
 	break;
       }
-      
+
       // insert into queue & delete from decode buffer
       insert_instruction(_queue_lookahead[i], queue);
       decode_buffer_remove_instruction(_queue_lookahead[i]);

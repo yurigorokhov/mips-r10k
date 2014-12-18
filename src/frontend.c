@@ -11,9 +11,9 @@ void frontend_init(unsigned int size) {
 
 void frontend_enqueue(instr* instruction) {
   if(idx == capacity - 1) {
-    instruction_buffer = (instr**)realloc(instruction_buffer, 
-					  100+(capacity*sizeof(instr*)));
     capacity += 100;
+    instruction_buffer = (instr**)realloc(instruction_buffer, 
+					  (capacity*sizeof(instr*)));
   }
   instruction_buffer[idx++] = instruction;
 }

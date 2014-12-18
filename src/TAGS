@@ -26,23 +26,25 @@ typedef int error_code;17,315
 committer.h,25
 #define COMMITTER_H2,20
 
-committer.c,298
+committer.c,340
 static instr* __instructions_to_commit[__instructions_to_commit3,24
 static unsigned int __instructions_to_commit_size 4,92
-void __calc_committer(6,148
-void __edge_committer(19,545
-unsigned int how_many_will_commit_next_clock(44,1282
-unsigned int how_many_addr_will_commit_next_clock(48,1374
+static instr* load_store_mem_cycle 5,147
+void __calc_committer(7,191
+void __edge_committer(25,774
+unsigned int how_many_will_commit_next_clock(57,1685
+unsigned int how_many_addr_will_commit_next_clock(61,1777
 
-active_list.h,246
+active_list.h,280
 #define ACTIVE_LIST_H2,22
-#define ACTIVE_LIST_SIZE 11,167
-  instr* instruction;14,213
-  char is_ready_on_next_clock;15,235
-  bool is_res_ready_on_next_clock;16,266
-  phys_reg physical;17,301
-  void* next;18,322
-} active_list_entry;19,336
+#define ACTIVE_LIST_SIZE 12,193
+  instr* instruction;15,239
+  char is_ready_on_next_clock;16,261
+  bool is_res_ready_on_next_clock;17,292
+  bool has_done_mem_cycle;18,327
+  phys_reg physical;19,354
+  void* next;20,375
+} active_list_entry;21,389
 
 instr_queue.h,140
 #define INSTR_QUEUE_H2,22
@@ -51,22 +53,31 @@ instr_queue.h,140
   void* next;17,302
 } instr_queue_entry;18,316
 
-active_list.c,532
+branch_stack.h,131
+#define BRANCH_STACK2,21
+  instr* instruction;8,101
+  void* next;9,123
+  bool is_ready_on_next_clock;10,137
+} bs_entry;11,168
+
+active_list.c,616
 static active_list_entry* head 3,26
 active_list_entry* get_newest_entry(5,66
 unsigned int size(14,257
 char active_list_is_full(24,431
 char active_list_is_empty(28,510
 error_code active_list_add(32,576
-void active_list_set_instr_res_ready(57,1268
-void active_list_set_instr_ready(69,1582
-bool active_list_is_instr_ready(81,1884
-instr* active_list_get_instr_ready(93,2201
-void active_list_commit_instruction(112,2615
-unsigned int active_list_how_many_spots_next_clock(119,2754
-void active_list_handle_mispredict(123,2907
+void active_list_set_instr_res_ready(58,1305
+void active_list_set_instr_ready(70,1619
+bool active_list_is_instr_ready(86,2096
+instr* active_list_get_instr_ready(98,2413
+void active_list_commit_instruction(118,2910
+unsigned int active_list_how_many_spots_next_clock(126,3081
+void active_list_handle_mispredict(130,3234
+unsigned int num_active_branches(159,3931
+void active_list_set_mem_cycle(171,4182
 
-instr_queue.c,921
+instr_queue.c,922
 static instr_queue_entry* int_queue_head 6,97
 static instr_queue_entry* addr_queue_head 9,164
 static instr_queue_entry* fp_queue_head 12,239
@@ -77,16 +88,16 @@ instr_queue_entry** get_queue_by_type(29,640
 void instr_queue_remove(47,1015
 bool will_instr_inputs_be_ready(65,1509
 instr* instr_queue_get_ready_addr_instr(82,2127
-instr* instr_queue_get_ready_fp_instr(98,2671
-instr* instr_queue_get_ready_int_instr(112,3131
-void __calc_instr_queue(135,3681
-void insert_instruction(169,4548
-void __edge_instr_queue(207,5542
-unsigned int instr_queue_free_int_spots_next_clock(240,6487
-unsigned int instr_queue_free_addr_spots_next_clock(244,6649
-unsigned int instr_queue_free_fp_spots_next_clock(248,6816
-void instr_queue_handle_mispredict_helper(253,6974
-void instr_queue_handle_mispredict(273,7469
+instr* instr_queue_get_ready_fp_instr(110,2896
+instr* instr_queue_get_ready_int_instr(124,3356
+void __calc_instr_queue(147,3906
+void insert_instruction(181,4773
+void __edge_instr_queue(219,5767
+unsigned int instr_queue_free_int_spots_next_clock(252,6655
+unsigned int instr_queue_free_addr_spots_next_clock(256,6817
+unsigned int instr_queue_free_fp_spots_next_clock(260,6984
+void instr_queue_handle_mispredict_helper(265,7142
+void instr_queue_handle_mispredict(285,7637
 
 fetch_stage.h,139
 #define FETCH_STAGE_H2,22
@@ -95,22 +106,29 @@ fetch_stage.h,139
   void* next;11,176
 } fetch_stage_entry;12,190
 
+branch_stack.c,142
+static bs_entry* head 3,27
+void bs_add(5,58
+void bs_remove(20,438
+void bs_set_instr_ready(37,822
+unsigned int bs_size_next_clock(47,1117
+
 decode_buffer.h,144
 #define DECODE_BUFFER_H2,24
-  instr* instruction;12,192
-  unsigned int cycles_left;13,214
-  void* next;14,242
-} decode_buffer_entry;15,256
+  instr* instruction;13,218
+  unsigned int cycles_left;14,240
+  void* next;15,268
+} decode_buffer_entry;16,282
 
 fetch_stage.c,237
 static fetch_stage_entry* head 3,26
 unsigned int __calc_fetch_stage(5,66
 void __edge_fetch_stage_add_instr(12,277
-instr* fetch_get_ready_instr(27,714
-void fetch_stage_remove_instr(43,1050
-void fetch_stage_handle_mispredict(59,1454
+instr* fetch_get_ready_instr(36,866
+void fetch_stage_remove_instr(53,1219
+void fetch_stage_handle_mispredict(69,1623
 
-decode_buffer.c,531
+decode_buffer.c,532
 static decode_buffer_entry* decode_buffer_head 3,28
 static instr* __calc_scheduled_to_be_added[__calc_scheduled_to_be_added5,85
 static unsigned int __calc_scheduled_size 6,160
@@ -118,11 +136,11 @@ unsigned int get_size(8,208
 bool is_full(18,393
 void add_instruction(22,473
 void __calc_decode_buffer(37,935
-void __edge_decode_buffer(46,1230
-instr* decode_buffer_get_next_ready_instr(63,1711
-void decode_buffer_remove_instruction(81,2155
-unsigned int decode_buffer_free_spots_next_clock(97,2610
-void decode_buffer_handle_mispredict(130,3667
+void __edge_decode_buffer(53,1379
+instr* decode_buffer_get_next_ready_instr(79,2070
+void decode_buffer_remove_instruction(97,2513
+unsigned int decode_buffer_free_spots_next_clock(113,2968
+void decode_buffer_handle_mispredict(146,3993
 
 misc.c,23
 unsigned int min(3,19
@@ -142,8 +160,8 @@ unsigned int frontend_augment_steps_starting_at_addr(63,1414
 
 mipsr10k.c,68
 int main(14,239
-bool is_empty(63,1452
-void print_history(74,1602
+bool is_empty(62,1407
+void print_history(73,1557
 
 instr.c,263
 error_code parse_instruction(9,213
@@ -209,9 +227,9 @@ void __calc_functional_units(26,635
 void remove_head(44,1471
 void queue(60,1850
 void __edge_functional_units(71,2095
-unsigned int f_taking_int(142,4108
-unsigned int f_taking_fp(147,4163
-unsigned int f_taking_addr(152,4216
+unsigned int f_taking_int(139,3950
+unsigned int f_taking_fp(144,4005
+unsigned int f_taking_addr(149,4058
 
 reg_map.c,277
 free_list_entry* free_list 6,124
@@ -253,15 +271,16 @@ typedef unsigned int logi_reg;12,170
   void* next;23,362
 } busy_list_entry;24,376
 
-constants.h,382
+constants.h,416
 #define BACKEND_DISPATCH_PER_CYCLE 7,179
 #define DECODE_BUFFER_SIZE 12,278
 #define INT_QUEUE_SIZE 16,338
 #define ADDR_QUEUE_SIZE 20,396
 #define FP_QUEUE_SIZE 24,453
-#define FETCH_CYCLES 29,533
-#define DECODE_CYCLES 33,586
-#define ISSUE_CYCLES 37,639
-#define FUNCTIONAL_INTEGER_CYCLES 41,704
-#define FUNCTIONAL_FP_CYCLES 45,777
-#define FUNCTIONAL_LOAD_STORE_CYCLES 49,853
+#define BRANCH_STACK_SIZE 28,512
+#define FETCH_CYCLES 35,670
+#define DECODE_CYCLES 39,723
+#define ISSUE_CYCLES 43,776
+#define FUNCTIONAL_INTEGER_CYCLES 47,841
+#define FUNCTIONAL_FP_CYCLES 51,914
+#define FUNCTIONAL_LOAD_STORE_CYCLES 55,990

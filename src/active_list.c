@@ -44,6 +44,7 @@ error_code active_list_add(instr* instruction) {
   entry->next = NULL;
   entry->is_ready_on_next_clock = 0;
   entry->is_res_ready_on_next_clock = false;
+  entry->has_done_mem_cycle = false;
   entry->physical = physical;
   active_list_entry* newest = get_newest_entry();
   if(NULL == newest) {
@@ -72,6 +73,10 @@ void active_list_set_instr_ready(instr* instruction) {
   while(NULL != current) {
     if(current->instruction->addr == instruction->addr) {
       current->is_ready_on_next_clock = 1;
+      
+      // notify the branch stack that an instruction will be ready
+      // it will handle the case if its not a branch
+      bs_set_instr_ready(current->instruction);
       break;
     }
     current = current->next;
@@ -90,7 +95,8 @@ bool active_list_is_instr_ready(instr* instruction) {
   return false;
 }
 
-instr* active_list_get_instr_ready(unsigned int skip) {
+instr* active_list_get_instr_ready(unsigned int skip, bool* has_done_mem_cycle) {
+  *has_done_mem_cycle = false;
   if(NULL == head) return NULL;
   active_list_entry* current = head;
   unsigned int i = 0;
@@ -101,6 +107,7 @@ instr* active_list_get_instr_ready(unsigned int skip) {
       return NULL;
     }
     if(skip == i) {
+      *has_done_mem_cycle = current->has_done_mem_cycle;
       return current->instruction;
     }
     ++i;
@@ -112,6 +119,7 @@ instr* active_list_get_instr_ready(unsigned int skip) {
 void active_list_commit_instruction() {
   if(NULL == head) return;
   active_list_entry* curr = head;
+  bs_remove(curr->instruction);
   head = head->next;
   free(curr);
 }
@@ -142,8 +150,31 @@ void active_list_handle_mispredict(instr* instruction) {
   do {
     prev = current;
     current = current->next;
-    if(prev->instruction->rd != UINT_MAX)
-      reg_map_free_by_logical(prev->instruction->rd);
+    logi_reg reg = get_dest_reg(prev->instruction);
+    if(reg != UINT_MAX)
+      reg_map_free_by_logical(reg);
+    bs_remove(prev->instruction);
     free(prev);
   } while(NULL != current->next);
+}
+
+unsigned int num_active_branches() {
+  unsigned int i = 0;
+  active_list_entry* curr = head;
+  while(NULL != curr) {
+    if(curr->instruction->op == BRANCH && !curr->is_ready_on_next_clock) {
+      i++;
+    }
+    curr = curr->next;
+  }
+  return i;
+}
+
+void active_list_set_mem_cycle(instr* instruction) {
+  active_list_entry* curr = head;
+  while(NULL != curr && instruction->addr != curr->instruction->addr) {
+    curr = curr->next;
+  }
+  if(curr == NULL) return;
+  curr->has_done_mem_cycle = true;
 }

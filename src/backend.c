@@ -46,7 +46,7 @@ error_code backend_cycle_step() {
     pc_addr = instr_mispredicted->addr;
     backend_step = frontend_augment_steps_starting_at_addr(instr_mispredicted->addr); 
     instr_mispredicted = NULL;
-
+    
     // introduce 1 cycle bubble!
     backend_cycle++;
   }
